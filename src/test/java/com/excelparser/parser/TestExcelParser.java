@@ -20,11 +20,11 @@ public class TestExcelParser {
 
 		long testStart = System.currentTimeMillis();
 		ExcelParser excelParser = new ExcelParser();
-		MatrixMap excelMatrixMap = excelParser.processOneSheet(SMALL_EXCEL_FILE);
-		assertEquals("colB row5", excelMatrixMap.getCellValue("B5"));
-		assertEquals(Arrays.asList(expectedSubColumn), excelMatrixMap.getColumn("B", 2, 2));
-		assertEquals(5, excelMatrixMap.getColumnLength("B"));
-		assertEquals("colC row3", excelMatrixMap.getRow(3).get(2));
+		MatrixMap<String, String> spreadsheet = excelParser.processOneSheet(SMALL_EXCEL_FILE);
+		assertEquals("colB row5", spreadsheet.getEntry("B5"));
+		assertEquals(Arrays.asList(expectedSubColumn), spreadsheet.getColumn("B", 2, 2));
+		assertEquals(5, spreadsheet.getColumnLength("B"));
+		assertEquals("colC row3", spreadsheet.getRow(3).get(2));
 		System.out.println("Total time for small excel test (5 rows x 5 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
@@ -36,15 +36,16 @@ public class TestExcelParser {
 		long testStart = System.currentTimeMillis();
 		ExcelParser excelParser = new ExcelParser();
 		long start = System.currentTimeMillis();
-		MatrixMap excelMatrixMap = excelParser.processOneSheet(LARGE_EXCEL_FILE);
+		MatrixMap<String, String> spreadsheet = excelParser.processOneSheet(LARGE_EXCEL_FILE);
 		System.out.println("Total time parsing spreadsheet: " 
 							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
 
 		start = System.currentTimeMillis();
-		assertEquals("colB row5043", excelMatrixMap.getCellValue("B5043"));
-		assertEquals(Arrays.asList(expectedSubColumn), excelMatrixMap.getColumn("D", 10, 2));
-		assertEquals(100000, excelMatrixMap.getColumnLength("B"));
-		assertEquals("colF row2334", excelMatrixMap.getRow(2334).get(5));
+		assertEquals("colB row5043", spreadsheet.getEntry("B5043"));
+		assertEquals(Arrays.asList(expectedSubColumn), spreadsheet.getColumn("D", 10, 2));
+		assertEquals(100000, spreadsheet.getColumnLength("B"));
+		assertEquals("colF row2334", spreadsheet.getRow(2334).get(5));
+		assertEquals("colF row2334", spreadsheet.getRow(2334).get(5));
 		System.out.println("Total time retrieving all request data: "
 							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
 		System.out.println("Total time for large excel test (100,000 rows x 10 columns): " 

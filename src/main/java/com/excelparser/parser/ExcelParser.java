@@ -16,16 +16,16 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.excelparser.matrixmap.ExcelMatrixMap;
 import com.excelparser.matrixmap.MatrixMap;
+import com.excelparser.spreadsheet.ExcelSpreadSheet;
 
 public class ExcelParser {
 
-	public MatrixMap processOneSheet(File file) throws Exception {
+	public MatrixMap<String, String> processOneSheet(File file) throws Exception {
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
-		MatrixMap excelMatrixMap = new ExcelMatrixMap();
+		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
 		XMLReader parser = fetchSheetParser(sst, excelMatrixMap);
 
 		// To look up the Sheet Name / Sheet Order / rID,
@@ -38,11 +38,11 @@ public class ExcelParser {
 		return excelMatrixMap;
 	}
 
-	public MatrixMap processAllSheets(File file) throws Exception {
+	public MatrixMap<String, String> processAllSheets(File file) throws Exception {
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
-		MatrixMap excelMatrixMap = new ExcelMatrixMap();
+		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
 		XMLReader parser = fetchSheetParser(sst, excelMatrixMap);
 
 		Iterator<InputStream> sheets = r.getSheetsData();
@@ -58,7 +58,7 @@ public class ExcelParser {
 	}
 
 	public XMLReader fetchSheetParser(SharedStringsTable sst,
-			MatrixMap excelMatrixMap) throws SAXException {
+			MatrixMap<String, String> excelMatrixMap) throws SAXException {
 		XMLReader parser = XMLReaderFactory
 				.createXMLReader("org.apache.xerces.parsers.SAXParser");
 		ContentHandler handler = new SheetHandler(sst, excelMatrixMap);
@@ -75,9 +75,9 @@ public class ExcelParser {
 		private String cellValue;
 		private boolean nextIsString;
 		private String cell;
-		private MatrixMap excelMatrixMap;
+		private MatrixMap<String, String> excelMatrixMap;
 
-		public SheetHandler(SharedStringsTable sst, MatrixMap excelMatrixMap) {
+		public SheetHandler(SharedStringsTable sst, MatrixMap<String, String> excelMatrixMap) {
 			this.sst = sst;
 			this.excelMatrixMap = excelMatrixMap;
 		}
