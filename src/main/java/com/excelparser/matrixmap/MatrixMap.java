@@ -1,26 +1,44 @@
 package com.excelparser.matrixmap;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-public interface MatrixMap<K, V> extends Map<K, V> {
+public interface MatrixMap<K, V> {
 
-	List<String> getColumn(K column);
+	List<V> getColumn(K column);
 
-	List<String> getColumn(K column, int start, int end);
+	List<V> getColumn(K column, int start, int end);
 
-	List<String> getColumn(K column, int start);
+	List<V> getColumn(K column, int start);
 
-	long getColumnLength(K column);
+	long getTotalColumnCells(K column);
 
-	List<String> getRow(int row);
+	List<V> getRow(int row);
 
-	List<String> getRow(int row, int start, int end);
+	List<V> getRow(int row, int start, int end);
 
-	List<String> getRow(int row, int start);
+	List<V> getRow(int row, int start);
 
-	long getRowLength(int row);
+	long getTotalRowCells(int row);
 
-	String getEntry(K cell);
+	V getEntry(K cell);
+
+	boolean clearEntry(K key);
+
+	boolean isEmpty();
+
+	int getTotalCells();
+
+	boolean containsEntry(K value);
+
+	boolean containsCell(K key);
+
+	V put(K cell, V value);
+
+	Collection<V> getHeader();
+
+	void clear();
+
+	V remove(K key);
 
 }

@@ -9,7 +9,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -26,7 +25,7 @@ public class ExcelParser {
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
 		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
-		XMLReader parser = fetchSheetParser(sst, excelMatrixMap);
+		XMLReader parser = fetchSheetParser(new SheetHandler(sst, excelMatrixMap));
 
 		// To look up the Sheet Name / Sheet Order / rID,
 		// you need to process the core Workbook stream.
@@ -43,7 +42,7 @@ public class ExcelParser {
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
 		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
-		XMLReader parser = fetchSheetParser(sst, excelMatrixMap);
+		XMLReader parser = fetchSheetParser(new SheetHandler(sst, excelMatrixMap));
 
 		Iterator<InputStream> sheets = r.getSheetsData();
 		while (sheets.hasNext()) {
@@ -57,12 +56,10 @@ public class ExcelParser {
 		return excelMatrixMap;
 	}
 
-	public XMLReader fetchSheetParser(SharedStringsTable sst,
-			MatrixMap<String, String> excelMatrixMap) throws SAXException {
+	private XMLReader fetchSheetParser(DefaultHandler sheetHandler) throws SAXException {
 		XMLReader parser = XMLReaderFactory
 				.createXMLReader("org.apache.xerces.parsers.SAXParser");
-		ContentHandler handler = new SheetHandler(sst, excelMatrixMap);
-		parser.setContentHandler(handler);
+		parser.setContentHandler(sheetHandler);
 		return parser;
 	}
 
