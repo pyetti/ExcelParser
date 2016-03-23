@@ -72,11 +72,11 @@ public class ExcelParser {
 		private String cellValue;
 		private boolean nextIsString;
 		private String cell;
-		private MatrixMap<String, String> excelMatrixMap;
+		private MatrixMap<String, String> spreadSheet;
 
-		public SheetHandler(SharedStringsTable sst, MatrixMap<String, String> excelMatrixMap) {
+		public SheetHandler(SharedStringsTable sst, MatrixMap<String, String> spreadSheet) {
 			this.sst = sst;
-			this.excelMatrixMap = excelMatrixMap;
+			this.spreadSheet = spreadSheet;
 		}
 
 		public void startElement(String uri, String localName, String name,
@@ -112,7 +112,11 @@ public class ExcelParser {
 			// v => contents of a cell
 			// Output after we've seen the string contents
 			if (name.equals("v")) {
-				excelMatrixMap.put(cell, cellValue);
+				spreadSheet.put(cell, cellValue);
+//				Cell c = new Cell();
+//				c.parseCellPosition(cell);
+//				c.setData(cellValue);
+//				sheet.add(c);
 			}
 		}
 
