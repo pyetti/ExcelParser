@@ -3,6 +3,8 @@ package com.excelparser.matrixmap;
 import java.util.Collection;
 import java.util.List;
 
+import com.excelparser.spreadsheet.Move;
+
 public interface MatrixMap<K, V> {
 
 	List<V> getColumn(K column);
@@ -39,6 +41,6 @@ public interface MatrixMap<K, V> {
 
 	void clear();
 
-	V remove(K key);
+	V remove(K key, Move move);
 
 }
