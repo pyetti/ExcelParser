@@ -32,17 +32,15 @@ public class TestExcelParser {
 
 	@Test
 	public void testProcessOneSheetSmallExcelFile() throws Exception {
-		String[] expectedSubColumn = {"B3", "B4"};
-
 		ExcelParser excelParser = new ExcelParser();
 		long testStart = System.currentTimeMillis();
 		Matrix<String, String> spreadSheet = excelParser.processOneSheet(SMALL_EXCEL_FILE);
-		spreadSheet.getRow(3).stream().filter((String s) -> s.equalsIgnoreCase("B3")).forEach((String s) -> System.out.println(s));
 		assertEquals("B5", spreadSheet.getEntry("B5"));
-		assertEquals(Arrays.asList(expectedSubColumn), spreadSheet.getColumn("B", 2, 2));
+		assertEquals(Arrays.asList("B3", "B4"), spreadSheet.getColumn("B", 2, 2));
 		assertEquals(5, spreadSheet.getTotalColumnCells("B"));
 		assertEquals("C3", spreadSheet.getRow(3).get(2));
 		assertEquals(25, spreadSheet.getTotalCells());
+		assertEquals(Arrays.asList("A2"), spreadSheet.getCells((String s) -> s.equals("A2")));
 		System.out.println("Total time for small excel test (5 rows x 5 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
@@ -50,7 +48,6 @@ public class TestExcelParser {
 	@Test
 	public void testProcessOneSheetLargeExcelFile() throws Exception {
 		System.out.println("Used Memory Large Excel: " + ((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
-		String[] expectedSubColumn = {"D11", "D12"};
 		
 		long testStart = System.currentTimeMillis();
 		ExcelParser excelParser = new ExcelParser();
@@ -61,7 +58,7 @@ public class TestExcelParser {
 
 		start = System.currentTimeMillis();
 		assertEquals("B5043", spreadSheet.getEntry("B5043"));
-		assertEquals(Arrays.asList(expectedSubColumn), spreadSheet.getColumn("D", 10, 2));
+		assertEquals(Arrays.asList("D11", "D12"), spreadSheet.getColumn("D", 10, 2));
 		assertEquals(100000, spreadSheet.getTotalColumnCells("B"));
 		assertEquals("F2334", spreadSheet.getRow(2334).get(5));
 		assertEquals(1000000, spreadSheet.getTotalCells());
@@ -74,13 +71,12 @@ public class TestExcelParser {
 
 	@Test
 	public void testAsymSpreadsheet() throws Exception {
-		String[] expectedSubColumn = {"C3", "C5"};
 
 		ExcelParser excelParser = new ExcelParser();
 		long testStart = System.currentTimeMillis();
 		Matrix<String, String> spreadSheet = excelParser.processOneSheet(ASYM_EXCEL_FILE);
 		assertEquals("B5", spreadSheet.getEntry("B5"));
-		assertEquals(Arrays.asList(expectedSubColumn), spreadSheet.getColumn("C", 2, 2));
+		assertEquals(Arrays.asList("C3", "C5"), spreadSheet.getColumn("C", 2, 2));
 		assertEquals(12, spreadSheet.getTotalColumnCells("C"));
 		assertTrue(spreadSheet.clearEntry("C6"));
 		assertEquals(5, spreadSheet.getTotalRowCells(6));

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Iterator;
 
+import javax.sql.DataSource;
+
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
@@ -15,16 +17,16 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.excelparser.matrixmap.MatrixMap;
+import com.excelparser.matrixmap.Matrix;
 import com.excelparser.spreadsheet.ExcelSpreadSheet;
 
 public class ExcelParser {
 
-	public MatrixMap<String, String> processOneSheet(File file) throws Exception {
+	public Matrix<String, String> processOneSheet(File file) throws Exception {
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
-		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
+		Matrix<String, String> excelMatrixMap = new ExcelSpreadSheet();
 		XMLReader parser = fetchSheetParser(new SheetHandler(sst, excelMatrixMap));
 
 		// To look up the Sheet Name / Sheet Order / rID,
@@ -37,11 +39,11 @@ public class ExcelParser {
 		return excelMatrixMap;
 	}
 
-	public MatrixMap<String, String> processAllSheets(File file) throws Exception {
+	public Matrix<String, String> processAllSheets(File file) throws Exception {
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
-		MatrixMap<String, String> excelMatrixMap = new ExcelSpreadSheet();
+		Matrix<String, String> excelMatrixMap = new ExcelSpreadSheet();
 		XMLReader parser = fetchSheetParser(new SheetHandler(sst, excelMatrixMap));
 
 		Iterator<InputStream> sheets = r.getSheetsData();
@@ -54,6 +56,10 @@ public class ExcelParser {
 			System.out.println("");
 		}
 		return excelMatrixMap;
+	}
+
+	public int persistSheetData(File file, DataSource dataSource, String sql) throws Exception {
+		throw new UnsupportedOperationException("Method not yet implemented");
 	}
 
 	private XMLReader fetchSheetParser(DefaultHandler sheetHandler) throws SAXException {
@@ -72,9 +78,9 @@ public class ExcelParser {
 		private String cellValue;
 		private boolean nextIsString;
 		private String cell;
-		private MatrixMap<String, String> spreadSheet;
+		private Matrix<String, String> spreadSheet;
 
-		public SheetHandler(SharedStringsTable sst, MatrixMap<String, String> spreadSheet) {
+		public SheetHandler(SharedStringsTable sst, Matrix<String, String> spreadSheet) {
 			this.sst = sst;
 			this.spreadSheet = spreadSheet;
 		}

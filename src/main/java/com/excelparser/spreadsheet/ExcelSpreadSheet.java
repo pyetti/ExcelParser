@@ -1,14 +1,15 @@
 package com.excelparser.spreadsheet;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import com.excelparser.matrixmap.MatrixMap;
+import com.excelparser.matrixmap.Matrix;
 
-public class ExcelSpreadSheet implements MatrixMap<String, String>  {
+public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	private Map<String, String> excelMap;
 
@@ -17,13 +18,19 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	}
 
 	@Override
+	public List<String> getCells(Predicate<String> predicate) {
+		List<String> cells = new ArrayList<String>();
+		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(cells, excelMap);
+		excelMap.values().stream().filter(predicate).forEach(excelConsumer);
+		return cells;
+	}
+
+	@Override
 	public List<String> getColumn(String column) {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
-		ExcelConsumer<String, String>excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(column, (String  s) -> s.substring(0, column.length()));
-		excelMap.keySet().stream().filter(predicate)
+		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
+		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
 				.forEachOrdered(excelConsumer);
 		return columnList;
 	}
@@ -33,9 +40,7 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(column, (String s) -> s.substring(0, column.length()));
-		excelMap.keySet().stream().skip(skip).filter(predicate)
+		excelMap.keySet().stream().skip(skip).filter((String  s) -> s.substring(0, column.length()).equals(column))
 				.forEachOrdered(excelConsumer);
 		return columnList;
 	}
@@ -45,9 +50,8 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(column, (String s) -> s.substring(0, column.length()));
-		excelMap.keySet().stream().filter(predicate).skip(skip).limit(limit)
+		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
+				.skip(skip).limit(limit)
 				.forEachOrdered(excelConsumer);
 		return columnList;
 	}
@@ -55,18 +59,14 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	@Override
 	public long getTotalColumnCells(String column) {
 		column.toUpperCase();
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(column, (String s) -> s.substring(0, column.length()));
-		return excelMap.keySet().stream().filter(predicate).count();
+		return excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column)).count();
 	}
 
 	@Override
 	public List<String> getRow(int row) {
 		List<String> rowList = new ArrayList<String>();
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(String.valueOf(row), (String s) -> s.substring(1));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().filter(predicate)
+		excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row)))
 				.forEachOrdered(excelConsumer);
 		return rowList;
 	}
@@ -74,10 +74,8 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	@Override
 	public List<String> getRow(int row, int skip) {
 		List<String> rowList = new ArrayList<String>();
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(String.valueOf(row), (String s) -> s.substring(1));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().skip(skip).filter(predicate)
+		excelMap.keySet().stream().skip(skip).filter((String s) -> s.substring(1).equals(String.valueOf(row)))
 				.forEachOrdered(excelConsumer);
 		return rowList;
 	}
@@ -85,19 +83,16 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	@Override
 	public List<String> getRow(int row, int skip, int limit) {
 		List<String> rowList = new ArrayList<String>();
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(String.valueOf(row), (String s) -> s.substring(1));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().filter(predicate).skip(skip).limit(limit)
+		excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row)))
+				.skip(skip).limit(limit)
 				.forEachOrdered(excelConsumer);
 		return rowList;
 	}
 
 	@Override
 	public long getTotalRowCells(int row) {
-		ExcelPredicate<String, String, String> predicate = 
-				new ExcelPredicate<String, String, String>(String.valueOf(row), (String s) -> s.substring(1));
-		return excelMap.keySet().stream().filter(predicate).count();
+		return excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row))).count();
 	}
 
 	@Override
@@ -118,8 +113,7 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 
 	@Override
 	public String put(String cell, String value) {
-		cell.toUpperCase();
-		return excelMap.put(cell, value);
+		return excelMap.put(cell.toUpperCase(), value);
 	}
 
 	@Override
@@ -133,23 +127,39 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	}
 
 	@Override
+	public boolean containsEntry(String value) {
+		return excelMap.containsValue(value);
+	}
+
+	@Override
 	public boolean containsCell(String cell) {
 		cell.toUpperCase();
 		return excelMap.containsKey(cell);
 	}
 
 	@Override
-	public boolean containsEntry(String value) {
-		return excelMap.containsValue(value);
-	}
-
-	@Override
-	public Collection<String> getHeader() {
+	public List<String> getHeader() {
 		return getRow(1);
 	}
 
 	@Override
-	public String remove(String key, Move move) {
+	public String removeColumn(String column, Move move) {
+		if (Move.UP.equals(move)) {
+			
+		}
+		return null;
+	}
+
+	@Override
+	public String removeRow(String cell, Move move) {
+		if (Move.UP.equals(move)) {
+			
+		}
+		return null;
+	}
+
+	@Override
+	public String removeCell(String cell, Move move) {
 		if (Move.UP.equals(move)) {
 			
 		}
@@ -159,6 +169,17 @@ public class ExcelSpreadSheet implements MatrixMap<String, String>  {
 	@Override
 	public void clear() {
 		excelMap.clear();
+	}
+
+	@Override
+	public Map<String, String> getSheet() {
+		return excelMap;
+	}
+
+	@Override
+	public Iterator<String> iterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
