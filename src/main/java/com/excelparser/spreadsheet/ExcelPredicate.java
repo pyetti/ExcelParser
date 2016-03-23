@@ -13,8 +13,8 @@ public class ExcelPredicate<T, F, R> implements Predicate<F> {
 	}
 
 	@Override
-	public boolean test(F e) {
-		return t.equals(excelFunction.function(e));
+	public boolean test(F f) {
+		return t.equals(excelFunction.function(f));
 	}
 
 }

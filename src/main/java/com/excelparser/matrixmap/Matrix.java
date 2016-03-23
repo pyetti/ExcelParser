@@ -117,7 +117,7 @@ public interface Matrix<K, V> extends Iterable<V> {
 	 * depending on the Move enum passed in, which will attempt to mimic what
 	 * happens in Excel
 	 */
-	String removeRow(String cell, Move move);
+	String removeRow(String row, Move move);
 
 	/**
 	 * Yeah, uhhhh... working on that. Remove methods have to update sheet

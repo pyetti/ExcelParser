@@ -65,17 +65,18 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getRow(int row) {
 		List<String> rowList = new ArrayList<String>();
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row)))
-				.forEachOrdered(excelConsumer);
+		excelMap.keySet().stream().filter(rowPredicate).forEachOrdered(excelConsumer);
 		return rowList;
 	}
 
 	@Override
 	public List<String> getRow(int row, int skip) {
 		List<String> rowList = new ArrayList<String>();
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().skip(skip).filter((String s) -> s.substring(1).equals(String.valueOf(row)))
+		excelMap.keySet().stream().skip(skip).filter(rowPredicate)
 				.forEachOrdered(excelConsumer);
 		return rowList;
 	}
@@ -83,8 +84,9 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getRow(int row, int skip, int limit) {
 		List<String> rowList = new ArrayList<String>();
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row)))
+		excelMap.keySet().stream().filter(rowPredicate)
 				.skip(skip).limit(limit)
 				.forEachOrdered(excelConsumer);
 		return rowList;
@@ -92,7 +94,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public long getTotalRowCells(int row) {
-		return excelMap.keySet().stream().filter((String s) -> s.substring(1).equals(String.valueOf(row))).count();
+		return excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction())).count();
 	}
 
 	@Override
@@ -144,18 +146,22 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public String removeColumn(String column, Move move) {
-		if (Move.UP.equals(move)) {
+		if (Move.RIGHT.equals(move)) {
+			
+		} else if (Move.LEFT.equals(move)) {
 			
 		}
-		return null;
+		throw new IllegalArgumentException("Move." + move + " not supported for removeColumn");
 	}
 
 	@Override
-	public String removeRow(String cell, Move move) {
+	public String removeRow(String row, Move move) {
 		if (Move.UP.equals(move)) {
+			excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction()));
+		} else if (Move.DOWN.equals(move)) {
 			
 		}
-		return null;
+		throw new IllegalArgumentException("Move." + move + " not supported for removeRow");
 	}
 
 	@Override
@@ -187,6 +193,41 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Total Cells: ").append(getTotalCells());
 		return builder.toString();
+	}
+
+	private class RowFunction implements ExcelFunction<String, String> {
+
+		private StringBuilder builder = new StringBuilder();
+
+		@Override
+		public String function(String s) {
+			builder.setLength(0);
+			for (int i = 0; i < s.length(); i++) {
+				char character = s.charAt(i);
+				if (Character.isDigit(character)) {
+					builder.append(character);
+				}
+			}
+			return builder.toString();
+		}
+		
+	}
+
+	private class RowPredicate implements Predicate<String> {
+
+		private String row;
+		private ExcelFunction<String, String> excelFunction;
+	
+		public RowPredicate(String row, ExcelFunction<String, String> excelFunction) {
+			this.row = row;
+			this.excelFunction = excelFunction;
+		}
+
+		@Override
+		public boolean test(String s) {
+			return row.equals(excelFunction.function(s));
+		}
+		
 	}
 
 }

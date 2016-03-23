@@ -39,7 +39,8 @@ public class TestExcelParser {
 		assertEquals(Arrays.asList("B3", "B4"), spreadSheet.getColumn("B", 2, 2));
 		assertEquals(5, spreadSheet.getTotalColumnCells("B"));
 		assertEquals("C3", spreadSheet.getRow(3).get(2));
-		assertEquals(25, spreadSheet.getTotalCells());
+		assertEquals(Arrays.asList("A3", "B3", "C3", "D3", "E3", "AA3"), spreadSheet.getRow(3));
+		assertEquals(26, spreadSheet.getTotalCells());
 		assertEquals(Arrays.asList("A2"), spreadSheet.getCells((String s) -> s.equals("A2")));
 		System.out.println("Total time for small excel test (5 rows x 5 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");

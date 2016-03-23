@@ -119,10 +119,6 @@ public class ExcelParser {
 			// Output after we've seen the string contents
 			if (name.equals("v")) {
 				spreadSheet.put(cell, cellValue);
-//				Cell c = new Cell();
-//				c.parseCellPosition(cell);
-//				c.setData(cellValue);
-//				sheet.add(c);
 			}
 		}
 
