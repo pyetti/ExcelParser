@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.excelparser.spreadsheet.Move;
 
-public interface MatrixMap<K, V> {
+public interface Matrix<K, V> {
 
 	List<V> getColumn(K column);
 
