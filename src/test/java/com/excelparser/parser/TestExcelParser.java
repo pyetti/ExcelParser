@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.excelparser.matrixmap.MatrixMap;
@@ -15,6 +17,18 @@ public class TestExcelParser {
 	private static final File SMALL_EXCEL_FILE = new File("src/test/resources/small-excel.xlsx");
 	private static final File LARGE_EXCEL_FILE = new File("src/test/resources/excel.xlsx");
 	private static final File ASYM_EXCEL_FILE = new File("src/test/resources/asym-spreadsheet.xlsx");
+	private static final int mb = 1024*1024;
+	private static final Runtime runtime = Runtime.getRuntime();
+
+	@BeforeClass
+	public static void preTests() {
+		System.out.println("Used Memory: " + ((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
+	}
+
+	@AfterClass
+	public static void postTests() {
+		System.out.println("Used Memory: " + ((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
+	}
 
 	@Test
 	public void testProcessOneSheetSmallExcelFile() throws Exception {
@@ -34,6 +48,7 @@ public class TestExcelParser {
 
 	@Test
 	public void testProcessOneSheetLargeExcelFile() throws Exception {
+		System.out.println("Used Memory Large Excel: " + ((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
 		String[] expectedSubColumn = {"colD row11", "colD row12"};
 		
 		long testStart = System.currentTimeMillis();
@@ -52,7 +67,8 @@ public class TestExcelParser {
 		System.out.println("Total time retrieving all request data: "
 							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
 		System.out.println("Total time for large excel test (100,000 rows x 10 columns): " 
-							+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
+							+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds");
+		System.out.println("Used Memory Large Excel: " + ((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@Test
@@ -69,7 +85,7 @@ public class TestExcelParser {
 		assertEquals(5, spreadSheet.getTotalRowCells(6));
 		assertEquals("colC row3", spreadSheet.getRow(3).get(2));
 		assertEquals(72, spreadSheet.getTotalCells());
-		System.out.println("Total time for asym spreadsheet test (5 rows x 5 columns): " 
+		System.out.println("Total time for asym spreadsheet test: " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
 
