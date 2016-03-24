@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import com.excelparser.spreadsheet.Move;
 
-public interface Matrix<K, V> extends Iterable<V> {
+public interface Matrix<K, V> {
 
 	/**
 	 * Returns a list of cell data filtered by the Predicate passed in.

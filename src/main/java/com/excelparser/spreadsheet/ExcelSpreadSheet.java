@@ -1,7 +1,6 @@
 package com.excelparser.spreadsheet;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,8 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		excelMap.keySet().stream().skip(skip).filter((String  s) -> s.substring(0, column.length()).equals(column))
+		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
+				.skip(skip)
 				.forEachOrdered(excelConsumer);
 		return columnList;
 	}
@@ -65,7 +65,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getRow(int row) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
 		excelMap.keySet().stream().filter(rowPredicate).forEachOrdered(excelConsumer);
 		return rowList;
@@ -74,9 +74,9 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getRow(int row, int skip) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().skip(skip).filter(rowPredicate)
+		excelMap.keySet().stream().filter(rowPredicate).skip(skip)
 				.forEachOrdered(excelConsumer);
 		return rowList;
 	}
@@ -84,7 +84,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getRow(int row, int skip, int limit) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction());
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
 		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
 		excelMap.keySet().stream().filter(rowPredicate)
 				.skip(skip).limit(limit)
@@ -94,7 +94,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public long getTotalRowCells(int row) {
-		return excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction())).count();
+		return excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))))).count();
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public String removeRow(String row, Move move) {
 		if (Move.UP.equals(move)) {
-			excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction()));
+			excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0)))));
 		} else if (Move.DOWN.equals(move)) {
 			
 		}
@@ -183,12 +183,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	}
 
 	@Override
-	public Iterator<String> iterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Total Cells: ").append(getTotalCells());
@@ -198,13 +192,18 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	private class RowFunction implements ExcelFunction<String, String> {
 
 		private StringBuilder builder = new StringBuilder();
+		private Predicate<String> predicate;
+		
+		public RowFunction(Predicate<String> predicate) {
+			this.predicate = predicate;
+		}
 
 		@Override
 		public String function(String s) {
 			builder.setLength(0);
 			for (int i = 0; i < s.length(); i++) {
 				char character = s.charAt(i);
-				if (Character.isDigit(character)) {
+				if (predicate.test(String.valueOf(character))) {
 					builder.append(character);
 				}
 			}
