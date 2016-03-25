@@ -1,9 +1,10 @@
 package com.excelparser.spreadsheet;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 import com.excelparser.matrixmap.Matrix;
@@ -13,7 +14,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	private Map<String, String> excelMap;
 
 	public ExcelSpreadSheet() {
-		excelMap = new LinkedHashMap<String, String>();
+		excelMap = new TreeMap<String, String>(new KeyComparator());
 	}
 
 	@Override
@@ -225,6 +226,40 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		@Override
 		public boolean test(String s) {
 			return row.equals(excelFunction.function(s));
+		}
+		
+	}
+
+	private class KeyComparator implements Comparator<String> {
+
+		@Override
+		public int compare(String s1, String s2) {
+			String column1 = getSubString(s1, (Character c) -> Character.isLetter(c)); 
+			String column2 = getSubString(s2, (Character c) -> Character.isLetter(c));
+			int row1 = Integer.parseInt(getSubString(s1, (Character c) -> Character.isDigit(c)));
+			int row2 = Integer.parseInt(getSubString(s2, (Character c) -> Character.isDigit(c)));
+			
+			if (column1.compareTo(column2) > 0) {
+				return 1;
+			} else if (column1.compareTo(column2) < 0) {
+				return -1;
+			} else if (row1 < row2) {
+				return -1;
+			} else if (row1 > row2){
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		private String getSubString(String s, Predicate<Character> predicate) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < s.length(); i++) {
+				if (predicate.test(s.charAt(i))) {
+					sb.append(s.charAt(i));
+				}
+			}
+			return sb.toString();
 		}
 		
 	}
