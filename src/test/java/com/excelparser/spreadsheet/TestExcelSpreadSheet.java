@@ -136,7 +136,25 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testRemoveColumn() {
+		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
+		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
+		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
+		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
+		spreadSheet.put("A5", "Jan5");
+																	  spreadSheet.put("C6", "Jan6");
+		spreadSheet.put("A7", "Jan7");
+		System.out.println(spreadSheet.getSheet());
 		
+		List<String> colB = spreadSheet.getColumn("C", 0, 10);
+		System.out.println(spreadSheet.getEntry("C2"));
+		System.out.println(colB);
+		spreadSheet.removeColumn("B");
+		colB = spreadSheet.getColumn("B", 0, 10);
+		System.out.println(colB);
+		System.out.println(spreadSheet.getEntry("B2"));
+		
+		System.out.println(spreadSheet.getSheet());
 	}
 
 	@Test

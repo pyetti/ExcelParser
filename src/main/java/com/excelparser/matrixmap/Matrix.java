@@ -113,25 +113,23 @@ public interface Matrix<K, V> {
 	void clear();
 
 	/**
-	 * Yeah, uhhhh... working on that. Remove methods have to update sheet
-	 * depending on the Move enum passed in, which will attempt to mimic what
-	 * happens in Excel
+	 * Yeah, uhhhh... working on that. Removing columns 
+	 * always moves the columns to the left.
 	 */
-	String removeRow(String row, Move move);
+	void removeColumn(String column);
 
 	/**
-	 * Yeah, uhhhh... working on that. Remove methods have to update sheet
-	 * depending on the Move enum passed in, which will attempt to mimic what
-	 * happens in Excel
+	 * Yeah, uhhhh... working on that. Removing rows always moves 
+	 * rows up
 	 */
-	String removeColumn(String column, Move move);
+	void removeRow(String row);
 
 	/**
-	 * Yeah, uhhhh... working on that. Remove method have to update sheet
+	 * Yeah, uhhhh... working on that. removeCell has to update the sheet
 	 * depending on the Move enum passed in, which will attempt to mimic what
 	 * happens in Excel
 	 */
-	V removeCell(K key, Move move);
+	void removeCell(K key, Move move);
 
 	Map<String, String> getSheet();
 

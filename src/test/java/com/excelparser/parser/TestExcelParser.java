@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,6 +59,13 @@ public class TestExcelParser {
 		assertEquals(Arrays.asList("A3", "B3", "C3", "D3", "E3", "AA3"), spreadSheet.getRow(3));
 		assertEquals(26, spreadSheet.getTotalCells());
 		assertEquals(Arrays.asList("A2"), spreadSheet.getCells((String s) -> s.equals("A2")));
+		List<String> colB = spreadSheet.getColumn("C", 0, 10);
+		System.out.println(spreadSheet.getEntry("C2"));
+		spreadSheet.removeColumn("B");
+		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
+		assertEquals(colB, newColB);
+		System.out.println(colB);
+		System.out.println(spreadSheet.getEntry("B2"));
 		System.out.println("Total time for small excel test (5 rows x 5 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
@@ -77,6 +85,13 @@ public class TestExcelParser {
 		assertEquals(100000, spreadSheet.getTotalColumnCells("B"));
 		assertEquals("F2334", spreadSheet.getRow(2334).get(5));
 		assertEquals(1000000, spreadSheet.getTotalCells());
+		List<String> colB = spreadSheet.getColumn("C", 0, 10);
+		System.out.println(spreadSheet.getEntry("C2"));
+		System.out.println(colB);
+		spreadSheet.removeColumn("B");
+		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
+		assertEquals(colB, newColB);
+		System.out.println(spreadSheet.getEntry("B2"));
 		System.out.println("Total time retrieving all request data: "
 							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
 		System.out.println("Total time for large excel test (100,000 rows x 10 columns): " 
@@ -96,6 +111,13 @@ public class TestExcelParser {
 		assertEquals(5, spreadSheet.getTotalRowCells(6));
 		assertEquals("C3", spreadSheet.getRow(3).get(2));
 		assertEquals(72, spreadSheet.getTotalCells());
+		List<String> colB = spreadSheet.getColumn("C", 0, 10);
+		System.out.println(spreadSheet.getEntry("C2"));
+		System.out.println(colB);
+		spreadSheet.removeColumn("B");
+		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
+		assertEquals(colB, newColB);
+		System.out.println(spreadSheet.getEntry("B2"));
 		System.out.println("Total time for asym spreadsheet test: " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}

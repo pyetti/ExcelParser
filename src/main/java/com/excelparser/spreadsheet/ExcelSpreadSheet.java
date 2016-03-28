@@ -1,6 +1,7 @@
 package com.excelparser.spreadsheet;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public List<String> getCells(Predicate<String> predicate) {
 		List<String> cells = new ArrayList<String>();
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(cells, excelMap);
-		excelMap.values().stream().filter(predicate).forEach(excelConsumer);
+		excelMap.values().stream().filter(predicate).forEach(s -> cells.add(excelMap.get(s)));
 		return cells;
 	}
 
@@ -28,9 +28,8 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	public List<String> getColumn(String column) {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
-				.forEachOrdered(excelConsumer);
+		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
+				.forEachOrdered(s -> columnList.add(excelMap.get(s)));
 		return columnList;
 	}
 
@@ -38,10 +37,9 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	public List<String> getColumn(String column, int skip) {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
+		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
 				.skip(skip)
-				.forEachOrdered(excelConsumer);
+				.forEachOrdered(s -> columnList.add(excelMap.get(s)));
 		return columnList;
 	}
 
@@ -49,52 +47,48 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	public List<String> getColumn(String column, int skip, int limit) {
 		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(columnList, excelMap);
-		excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column))
+		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
 				.skip(skip).limit(limit)
-				.forEachOrdered(excelConsumer);
+				.forEachOrdered(s -> columnList.add(excelMap.get(s)));
 		return columnList;
 	}
 
 	@Override
 	public long getTotalColumnCells(String column) {
 		column.toUpperCase();
-		return excelMap.keySet().stream().filter((String  s) -> s.substring(0, column.length()).equals(column)).count();
+		return excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column)).count();
 	}
 
 	@Override
 	public List<String> getRow(int row) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
-		excelMap.keySet().stream().filter(rowPredicate).forEachOrdered(excelConsumer);
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction(s -> Character.isDigit(s.charAt(0))));
+		excelMap.keySet().stream().filter(rowPredicate).forEachOrdered(s -> rowList.add(excelMap.get(s)));
 		return rowList;
 	}
 
 	@Override
 	public List<String> getRow(int row, int skip) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction(s -> Character.isDigit(s.charAt(0))));
 		excelMap.keySet().stream().filter(rowPredicate).skip(skip)
-				.forEachOrdered(excelConsumer);
+				.forEachOrdered(s -> rowList.add(excelMap.get(s)));
 		return rowList;
 	}
 
 	@Override
 	public List<String> getRow(int row, int skip, int limit) {
 		List<String> rowList = new ArrayList<String>();
-		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))));
-		ExcelConsumer<String, String> excelConsumer = new ExcelConsumer<String, String>(rowList, excelMap);
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction(s -> Character.isDigit(s.charAt(0))));
 		excelMap.keySet().stream().filter(rowPredicate)
 				.skip(skip).limit(limit)
-				.forEachOrdered(excelConsumer);
+				.forEachOrdered(s -> rowList.add(excelMap.get(s)));
 		return rowList;
 	}
 
 	@Override
 	public long getTotalRowCells(int row) {
-		return excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0))))).count();
+		return excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction(s -> Character.isDigit(s.charAt(0))))).count();
 	}
 
 	@Override
@@ -145,31 +139,64 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	}
 
 	@Override
-	public String removeColumn(String column, Move move) {
-		if (Move.RIGHT.equals(move)) {
-			
-		} else if (Move.LEFT.equals(move)) {
-			
+	public void removeColumn(String column) {
+		column.toUpperCase();
+		StringBuilder newKey = new StringBuilder();
+		excelMap.keySet().stream()
+			.filter(s -> s.substring(0, column.length()).equals(column)).sorted()
+			.forEach(s -> this.excelMap.remove(s));
+		Map<String, String> tempMap = new LinkedHashMap<>();
+		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String> entry = it.next();
+			tempMap.put(replace(newKey, entry.getKey()), entry.getValue());
+			it.remove();
 		}
-		throw new IllegalArgumentException("Move." + move + " not supported for removeColumn");
+		excelMap = new LinkedHashMap<String, String>(tempMap);
+		tempMap.clear();
+	}
+
+	public String replace(StringBuilder newKey, String oldKey) {
+		if (oldKey.contains("AA")) {
+			return "AZ" + oldKey.charAt(2);
+		} else if (oldKey.length() == 2 && oldKey.contains("A")) {
+			return oldKey;
+		}
+
+		newKey.setLength(0);
+		parseCellPosition(newKey, oldKey, (Character ch) -> Character.isLetter(ch));
+
+		int newKeyLength = newKey.length();
+		int oldKeyLength = oldKey.length();
+		if (newKeyLength == 1) {
+			return String.valueOf((char) (newKey.charAt(0) - 1)) + 
+					oldKey.subSequence(1, oldKeyLength);
+		} else {
+			return String.valueOf((char) newKey.charAt(0)) + 
+					String.valueOf((char) (newKey.charAt(1) - 1)) +
+					oldKey.subSequence(2, oldKeyLength);
+		}
 	}
 
 	@Override
-	public String removeRow(String row, Move move) {
-		if (Move.UP.equals(move)) {
-			excelMap.keySet().stream().filter(new RowPredicate(String.valueOf(row), new RowFunction((String s) -> Character.isDigit(s.charAt(0)))));
-		} else if (Move.DOWN.equals(move)) {
-			
+	public void removeRow(String row) {
+		throw new UnsupportedOperationException("removeRow is not yet implemented.");
+	}
+
+	protected void parseCellPosition(StringBuilder newKey, String oldKey, Predicate<Character> predicate) {
+		for (int i = 0; i < oldKey.length(); i++) {
+			char ch = oldKey.charAt(i);
+			if (predicate.test(ch)) {
+				newKey.append(ch);
+			}
 		}
-		throw new IllegalArgumentException("Move." + move + " not supported for removeRow");
 	}
 
 	@Override
-	public String removeCell(String cell, Move move) {
+	public void removeCell(String cell, Move move) {
 		if (Move.UP.equals(move)) {
 			
 		}
-		return null;
+		throw new UnsupportedOperationException("removeCell is not yet implemented.");
 	}
 
 	@Override
