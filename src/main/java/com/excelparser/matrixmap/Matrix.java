@@ -122,7 +122,7 @@ public interface Matrix<K, V> {
 	 * Yeah, uhhhh... working on that. Removing rows always moves 
 	 * rows up
 	 */
-	void removeRow(String row);
+	void removeRow(int row);
 
 	/**
 	 * Yeah, uhhhh... working on that. removeCell has to update the sheet

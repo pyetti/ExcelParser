@@ -143,19 +143,19 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		column.toUpperCase();
 		StringBuilder newKey = new StringBuilder();
 		excelMap.keySet().stream()
-			.filter(s -> s.substring(0, column.length()).equals(column)).sorted()
-			.forEach(s -> this.excelMap.remove(s));
+			.filter(key -> key.substring(0, column.length()).equals(column)).sorted()
+			.forEach(key -> this.excelMap.remove(key));
 		Map<String, String> tempMap = new LinkedHashMap<>();
 		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<String, String> entry = it.next();
-			tempMap.put(replace(newKey, entry.getKey()), entry.getValue());
+			tempMap.put(updateColumnKey(newKey, entry.getKey()), entry.getValue());
 			it.remove();
 		}
 		excelMap = new LinkedHashMap<String, String>(tempMap);
-		tempMap.clear();
+		tempMap.clear(); tempMap = null;
 	}
 
-	public String replace(StringBuilder newKey, String oldKey) {
+	protected String updateColumnKey(StringBuilder newKey, String oldKey) {
 		if (oldKey.contains("AA")) {
 			return "AZ" + oldKey.charAt(2);
 		} else if (oldKey.length() == 2 && oldKey.contains("A")) {
@@ -163,7 +163,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		}
 
 		newKey.setLength(0);
-		parseCellPosition(newKey, oldKey, (Character ch) -> Character.isLetter(ch));
+		parseCellPosition(newKey, oldKey, ch -> Character.isLetter(ch));
 
 		int newKeyLength = newKey.length();
 		int oldKeyLength = oldKey.length();
@@ -178,17 +178,46 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	}
 
 	@Override
-	public void removeRow(String row) {
-		throw new UnsupportedOperationException("removeRow is not yet implemented.");
+	public void removeRow(int row) {
+		StringBuilder newKey = new StringBuilder();
+		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction(ch -> Character.isDigit(ch.charAt(0))));
+		excelMap.keySet().stream().filter(rowPredicate).sorted().forEach(key -> excelMap.remove(key));
+		
+		Map<String, String> tempMap = new LinkedHashMap<>();
+		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String> entry = it.next();
+			String key = entry.getKey();
+			if (key.length() == 2 && Integer.parseInt(key.substring(1)) > row) {
+				tempMap.put(updateRowKey(newKey, entry.getKey()), entry.getValue());
+				it.remove();
+			}
+		}
+		excelMap.putAll(tempMap);
+		tempMap.clear(); tempMap = null;
 	}
 
-	protected void parseCellPosition(StringBuilder newKey, String oldKey, Predicate<Character> predicate) {
+	protected String updateRowKey(StringBuilder newKey, String oldKey) {
+		newKey.setLength(0);
+		parseCellPosition(newKey, oldKey, ch -> Character.isDigit(ch));
+
+		int updatedRow = Integer.parseInt(newKey.toString()) - 1;
+		newKey.setLength(0);
+		int oldKeyLength = oldKey.length();
+		if (oldKeyLength == 2) {
+			return newKey.append(oldKey.substring(0, 1)).append(updatedRow).toString();
+		} else {
+			return newKey.append(oldKey.substring(0, 2)).append(updatedRow).toString();
+		}
+	}
+
+	protected StringBuilder parseCellPosition(StringBuilder newKey, String oldKey, Predicate<Character> predicate) {
 		for (int i = 0; i < oldKey.length(); i++) {
 			char ch = oldKey.charAt(i);
 			if (predicate.test(ch)) {
 				newKey.append(ch);
 			}
 		}
+		return newKey;
 	}
 
 	@Override
