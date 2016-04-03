@@ -137,18 +137,30 @@ public class TestExcelSpreadSheet {
 	@Test
 	public void testRemoveColumn() {
 		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
-		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
-		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
-		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
+		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1"); spreadSheet.put("D1", "Mar1");
+		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2"); spreadSheet.put("D2", "Mar1");
+		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3"); spreadSheet.put("D3", "Mar1");
 		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
 		spreadSheet.put("A5", "Jan5");
-																	  spreadSheet.put("C6", "Jan6");
+																	  spreadSheet.put("C6", "Jan6"); spreadSheet.put("D4", "Mar1");
 		spreadSheet.put("A7", "Jan7");
-		List<String> colC = spreadSheet.getColumn("C", 0, 10);
-		String c2 = spreadSheet.getEntry("C2");
-		spreadSheet.removeColumn("B");
-		assertEquals(colC, spreadSheet.getColumn("B", 0, 10));
-		assertEquals(c2, spreadSheet.getEntry("B2"));
+
+		List<String> colA = spreadSheet.getColumn("A");
+		List<String> colD = spreadSheet.getColumn("D", 0, 10);
+		String d2 = spreadSheet.getEntry("D2");
+		spreadSheet.removeColumn("C");
+		assertEquals(colD, spreadSheet.getColumn("C", 0, 10));
+		assertEquals(d2, spreadSheet.getEntry("C2"));
+		assertEquals(colA, spreadSheet.getColumn("A"));
+	}
+
+	@Test
+	public void testIsColumnLessThan() {
+		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		assertTrue(spreadSheet.isColumnLessThan("D", "F10"));
+		assertTrue(spreadSheet.isColumnLessThan("AD", "AF120"));
+		assertFalse(spreadSheet.isColumnLessThan("D", "B2"));
+		assertFalse(spreadSheet.isColumnLessThan("AD", "AB120"));
 	}
 
 	@Test
@@ -185,6 +197,13 @@ public class TestExcelSpreadSheet {
 
 		StringBuilder sb2 = spreadSheet.parseCellPosition(new StringBuilder(), "BC2", (Character c) -> Character.isLetter(c));
 		assertEquals("BC", sb2.toString());
+	}
+
+	@Test
+	public void testIsRowLessThan() {
+		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		assertTrue(spreadSheet.isRowLessThan(5, "A10"));
+		assertFalse(spreadSheet.isRowLessThan(150, "AB120"));
 	}
 
 	@Test

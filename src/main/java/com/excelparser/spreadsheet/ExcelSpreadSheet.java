@@ -1,6 +1,7 @@
 package com.excelparser.spreadsheet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -148,11 +149,20 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		Map<String, String> tempMap = new LinkedHashMap<>();
 		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<String, String> entry = it.next();
-			tempMap.put(updateColumnKey(newKey, entry.getKey()), entry.getValue());
-			it.remove();
+			String key = entry.getKey();
+			if (isColumnLessThan(column, key)) {
+				tempMap.put(updateColumnKey(newKey, entry.getKey()), entry.getValue());
+				it.remove();
+			}
 		}
-		excelMap = new LinkedHashMap<String, String>(tempMap);
+		excelMap.putAll(tempMap);
 		tempMap.clear(); tempMap = null;
+	}
+
+	protected boolean isColumnLessThan(String column, String key) {
+		List<String> columnName = new ArrayList<String>(Arrays.asList(key.split("[0-9]")));
+		columnName.removeIf(s -> s instanceof String && (s == null || "".equals(s)));
+		return columnName.get(0).compareTo(column) >= 1 ? true : false;
 	}
 
 	protected String updateColumnKey(StringBuilder newKey, String oldKey) {
@@ -182,18 +192,24 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		StringBuilder newKey = new StringBuilder();
 		Predicate<String> rowPredicate = new RowPredicate(String.valueOf(row), new RowFunction(ch -> Character.isDigit(ch.charAt(0))));
 		excelMap.keySet().stream().filter(rowPredicate).sorted().forEach(key -> excelMap.remove(key));
-		
+
 		Map<String, String> tempMap = new LinkedHashMap<>();
 		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<String, String> entry = it.next();
 			String key = entry.getKey();
-			if (key.length() == 2 && Integer.parseInt(key.substring(1)) > row) {
+			if (isRowLessThan(row, key)) {
 				tempMap.put(updateRowKey(newKey, entry.getKey()), entry.getValue());
 				it.remove();
 			}
 		}
 		excelMap.putAll(tempMap);
 		tempMap.clear(); tempMap = null;
+	}
+
+	protected boolean isRowLessThan(int row, String key) {
+		List<String> rowNum = new ArrayList<String>(Arrays.asList(key.split("[a-zA-Z]")));
+		rowNum.removeIf(s -> s instanceof String && (s == null || "".equals(s)));
+		return Integer.parseInt(rowNum.get(0)) > row;
 	}
 
 	protected String updateRowKey(StringBuilder newKey, String oldKey) {
