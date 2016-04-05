@@ -142,7 +142,7 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3"); spreadSheet.put("D3", "Mar1");
 		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
 		spreadSheet.put("A5", "Jan5");
-																	  spreadSheet.put("C6", "Jan6"); spreadSheet.put("D4", "Mar1");
+																	  spreadSheet.put("C6", "Mar6"); spreadSheet.put("D4", "Mar1");
 		spreadSheet.put("A7", "Jan7");
 
 		List<String> colA = spreadSheet.getColumn("A");
@@ -171,7 +171,7 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
 		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
 		spreadSheet.put("A5", "Jan5");
-																	  spreadSheet.put("C6", "Jan6");
+																	  spreadSheet.put("C6", "Mar6");
 		spreadSheet.put("A7", "Jan7");
 
 		List<String> row4 = spreadSheet.getRow(4, 0, 10);
@@ -224,11 +224,28 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
 		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
 		spreadSheet.put("A5", "Jan5");
-																	  spreadSheet.put("C6", "Jan6");
+																	  spreadSheet.put("C6", "Mar6");
 		spreadSheet.put("A7", "Jan7");
-		
+																	  spreadSheet.put("C8", "Mar8");
+
 		spreadSheet.removeCell("C2", Move.UP);
 		System.out.println(spreadSheet.getSheet());
+	}
+
+	@Test
+	public void testRemoveCellMoveLeft() {
+		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
+		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
+		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
+		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
+		spreadSheet.put("A5", "Jan5");
+																	  spreadSheet.put("C6", "Mar6");
+		spreadSheet.put("A7", "Jan7");
+		
+//		spreadSheet.removeCell("C1", Move.LEFT);
+//		System.out.println(spreadSheet.getSheet());
+		System.out.println("1".compareTo("2"));
 	}
 
 	@Test

@@ -113,21 +113,21 @@ public interface Matrix<K, V> {
 	void clear();
 
 	/**
-	 * Yeah, uhhhh... working on that. Removing columns 
-	 * always moves the columns to the left.
+	 * Removing columns always moves the columns to the left.
 	 */
 	void removeColumn(String column);
 
 	/**
-	 * Yeah, uhhhh... working on that. Removing rows always moves 
-	 * rows up
+	 * Removing rows always moves rows up
 	 */
 	void removeRow(int row);
 
 	/**
-	 * Yeah, uhhhh... working on that. removeCell has to update the sheet
-	 * depending on the Move enum passed in, which will attempt to mimic what
-	 * happens in Excel
+	 * removeCell has to update the sheet depending on the Move enum passed in, 
+	 * which will mimics what happens in Excel
+	 * 
+	 * @param key
+	 * @param move
 	 */
 	void removeCell(K key, Move move);
 

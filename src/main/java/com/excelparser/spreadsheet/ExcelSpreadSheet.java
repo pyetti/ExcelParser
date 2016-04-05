@@ -206,11 +206,11 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		return Integer.parseInt(rowNum.get(0)) > row;
 	}
 
-	protected boolean compareRows(int row, String key, Predicate<Integer> test) {
-		List<String> rowNum = new ArrayList<String>(Arrays.asList(key.split("[a-zA-Z]")));
+	protected boolean compareCells(String cellPos, String key, String regex) {
+		List<String> rowNum = new ArrayList<String>(Arrays.asList(key.split(regex)));
 		rowNum.removeIf(s -> s instanceof String && (s == null || "".equals(s)));
-		int val = Integer.parseInt(rowNum.get(0)) - row;
-		return test.test(val);
+		int compare = rowNum.get(0).compareTo(cellPos);
+		return compare >= 0 ? true : false;
 	}
 
 	protected String updateRowKey(StringBuilder newKey, String oldKey) {
@@ -231,7 +231,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		newKey.setLength(0);
 		parseCellPosition(newKey, oldKey, ch -> Character.isDigit(ch));
 
-		int updatedRow = Integer.parseInt(newKey.toString()) - updateRow;
+		int updatedRow = Integer.parseInt(newKey.toString()) + updateRow;
 		newKey.setLength(0);
 		int oldKeyLength = oldKey.length();
 		if (oldKeyLength == 2) {
@@ -261,20 +261,32 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	private void removeCellMoveUp(String cell) {
 		StringBuilder column = parseCellPosition(new StringBuilder(), cell, ch -> Character.isLetter(ch));
-		int row = Integer.parseInt(parseCellPosition(new StringBuilder(), cell, ch -> Character.isDigit(ch)).toString());
-
+		String row = parseCellPosition(new StringBuilder(), cell, ch -> Character.isDigit(ch)).toString();
+		int nextRow = Integer.parseInt(row);
+		long totalRowsInColumn = getTotalColumnCells(column.toString());
+		
 		StringBuilder columnToUpdate = new StringBuilder();
 		Map<String, String> tempMap = new LinkedHashMap<>();
+		String keyWithNullNextVal = "";
+
 		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<String, String> entry = it.next();
 			String key = entry.getKey();
 			columnToUpdate.setLength(0);
+
 			parseCellPosition(columnToUpdate, key, ch -> Character.isLetter(ch));
 			if (columnToUpdate.toString().equals(column.toString())) {
-				if (compareRows(row, key, v -> v >= 0)) {
-					String value = excelMap.get(column.toString() + (++row));
+				if (compareCells(row, key, "[a-zA-Z]")) {
+					String value = excelMap.get(column.toString() + (++nextRow));
 					if (value != null) {
-						tempMap.put(key, value);
+						tempMap.put(keyWithNullNextVal != "" ? keyWithNullNextVal : key, value);
+						keyWithNullNextVal = "";
+					} else if ((nextRow - 1) == totalRowsInColumn) {
+						columnToUpdate.setLength(0);
+						tempMap.put(updateRowKey(columnToUpdate, key, -1), excelMap.get(key));
+					} else {
+						columnToUpdate.setLength(0);
+						keyWithNullNextVal = updateRowKey(columnToUpdate, key, 1);
 					}
 				} else {
 					tempMap.put(key, entry.getValue());
