@@ -1,6 +1,6 @@
 package com.excelparser.spreadsheet;
 
-public enum Move {
+public enum Shift {
 	
 	UP, LEFT;
 

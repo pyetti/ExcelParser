@@ -228,7 +228,7 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A7", "Jan7");
 																	  spreadSheet.put("C8", "Mar8");
 
-		spreadSheet.removeCell("C2", Move.UP);
+		spreadSheet.removeCell("C2", Shift.UP);
 		System.out.println(spreadSheet.getSheet());
 	}
 

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import com.excelparser.spreadsheet.Move;
+import com.excelparser.spreadsheet.Shift;
 
 public interface Matrix<K, V> {
 
@@ -123,13 +123,13 @@ public interface Matrix<K, V> {
 	void removeRow(int row);
 
 	/**
-	 * removeCell has to update the sheet depending on the Move enum passed in, 
+	 * removeCell has to update the sheet depending on the Shift enum passed in, 
 	 * which will mimics what happens in Excel
 	 * 
 	 * @param key
 	 * @param move
 	 */
-	void removeCell(K key, Move move);
+	void removeCell(K key, Shift move);
 
 	Map<String, String> getSheet();
 

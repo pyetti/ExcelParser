@@ -253,9 +253,11 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	}
 
 	@Override
-	public void removeCell(String cell, Move move) {
-		if (Move.UP.equals(move)) {
+	public void removeCell(String cell, Shift shift) {
+		if (Shift.UP.equals(shift)) {
 			removeCellMoveUp(cell);
+		} else {
+			
 		}
 	}
 
