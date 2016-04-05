@@ -27,7 +27,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public List<String> getColumn(String column) {
-		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
 				.forEachOrdered(s -> columnList.add(excelMap.get(s)));
@@ -36,7 +35,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public List<String> getColumn(String column, int skip) {
-		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
 				.skip(skip)
@@ -46,7 +44,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public List<String> getColumn(String column, int skip, int limit) {
-		column.toUpperCase();
 		List<String> columnList = new ArrayList<String>();
 		excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column))
 				.skip(skip).limit(limit)
@@ -56,7 +53,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public long getTotalColumnCells(String column) {
-		column.toUpperCase();
 		return excelMap.keySet().stream().filter(s -> s.substring(0, column.length()).equals(column)).count();
 	}
 
@@ -99,7 +95,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public boolean clearEntry(String cell) {
-		cell.toUpperCase();
 		if (excelMap.containsKey(cell)) {
 			excelMap.put(cell, "");
 			return true;
@@ -141,7 +136,6 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	@Override
 	public void removeColumn(String column) {
-		column.toUpperCase();
 		StringBuilder newKey = new StringBuilder();
 		excelMap.keySet().stream()
 			.filter(key -> key.substring(0, column.length()).equals(column)).sorted()
@@ -151,7 +145,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 			Map.Entry<String, String> entry = it.next();
 			String key = entry.getKey();
 			if (isColumnLessThan(column, key)) {
-				tempMap.put(updateColumnKey(newKey, entry.getKey()), entry.getValue());
+				tempMap.put(updateColumnKey(newKey, key), entry.getValue());
 				it.remove();
 			}
 		}
@@ -198,7 +192,7 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 			Map.Entry<String, String> entry = it.next();
 			String key = entry.getKey();
 			if (isRowLessThan(row, key)) {
-				tempMap.put(updateRowKey(newKey, entry.getKey()), entry.getValue());
+				tempMap.put(updateRowKey(newKey, key), entry.getValue());
 				it.remove();
 			}
 		}
@@ -210,6 +204,13 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		List<String> rowNum = new ArrayList<String>(Arrays.asList(key.split("[a-zA-Z]")));
 		rowNum.removeIf(s -> s instanceof String && (s == null || "".equals(s)));
 		return Integer.parseInt(rowNum.get(0)) > row;
+	}
+
+	protected boolean compareRows(int row, String key, Predicate<Integer> test) {
+		List<String> rowNum = new ArrayList<String>(Arrays.asList(key.split("[a-zA-Z]")));
+		rowNum.removeIf(s -> s instanceof String && (s == null || "".equals(s)));
+		int val = Integer.parseInt(rowNum.get(0)) - row;
+		return test.test(val);
 	}
 
 	protected String updateRowKey(StringBuilder newKey, String oldKey) {
@@ -226,7 +227,22 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 		}
 	}
 
-	protected StringBuilder parseCellPosition(StringBuilder newKey, String oldKey, Predicate<Character> predicate) {
+	protected String updateRowKey(StringBuilder newKey, String oldKey, int updateRow) {
+		newKey.setLength(0);
+		parseCellPosition(newKey, oldKey, ch -> Character.isDigit(ch));
+
+		int updatedRow = Integer.parseInt(newKey.toString()) - updateRow;
+		newKey.setLength(0);
+		int oldKeyLength = oldKey.length();
+		if (oldKeyLength == 2) {
+			return newKey.append(oldKey.substring(0, 1)).append(updatedRow).toString();
+		} else {
+			return newKey.append(oldKey.substring(0, 2)).append(updatedRow).toString();
+		}
+	}
+
+	protected StringBuilder parseCellPosition(StringBuilder newKey, String oldKey, 
+			Predicate<Character> predicate) {
 		for (int i = 0; i < oldKey.length(); i++) {
 			char ch = oldKey.charAt(i);
 			if (predicate.test(ch)) {
@@ -239,9 +255,37 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public void removeCell(String cell, Move move) {
 		if (Move.UP.equals(move)) {
-			
+			removeCellMoveUp(cell);
 		}
-		throw new UnsupportedOperationException("removeCell is not yet implemented.");
+	}
+
+	private void removeCellMoveUp(String cell) {
+		StringBuilder column = parseCellPosition(new StringBuilder(), cell, ch -> Character.isLetter(ch));
+		int row = Integer.parseInt(parseCellPosition(new StringBuilder(), cell, ch -> Character.isDigit(ch)).toString());
+
+		StringBuilder columnToUpdate = new StringBuilder();
+		Map<String, String> tempMap = new LinkedHashMap<>();
+		for (Iterator<Map.Entry<String, String>> it = excelMap.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String> entry = it.next();
+			String key = entry.getKey();
+			columnToUpdate.setLength(0);
+			parseCellPosition(columnToUpdate, key, ch -> Character.isLetter(ch));
+			if (columnToUpdate.toString().equals(column.toString())) {
+				if (compareRows(row, key, v -> v >= 0)) {
+					String value = excelMap.get(column.toString() + (++row));
+					if (value != null) {
+						tempMap.put(key, value);
+					}
+				} else {
+					tempMap.put(key, entry.getValue());
+				}
+			} else {
+				tempMap.put(key, entry.getValue());
+			}
+			it.remove();
+		}
+		excelMap.putAll(tempMap);
+		tempMap.clear(); tempMap = null;
 	}
 
 	@Override
