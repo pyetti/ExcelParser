@@ -157,10 +157,10 @@ public class TestExcelSpreadSheet {
 	@Test
 	public void testIsColumnLessThan() {
 		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
-		assertTrue(spreadSheet.isColumnLessThan("D", "F10"));
-		assertTrue(spreadSheet.isColumnLessThan("AD", "AF120"));
-		assertFalse(spreadSheet.isColumnLessThan("D", "B2"));
-		assertFalse(spreadSheet.isColumnLessThan("AD", "AB120"));
+		assertTrue(spreadSheet.isColumnAfter("D", "F10"));
+		assertTrue(spreadSheet.isColumnAfter("AD", "AF120"));
+		assertFalse(spreadSheet.isColumnAfter("D", "B2"));
+		assertFalse(spreadSheet.isColumnAfter("AD", "AB120"));
 	}
 
 	@Test
@@ -175,10 +175,7 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A7", "Jan7");
 
 		List<String> row4 = spreadSheet.getRow(4, 0, 10);
-		System.out.println("Current row 4: " + row4);
 		spreadSheet.removeRow(3);
-		System.out.println("New row 3: " + spreadSheet.getRow(3));
-		System.out.println(spreadSheet.getSheet());
 		assertEquals(row4, spreadSheet.getRow(3));
 	}
 
@@ -202,8 +199,8 @@ public class TestExcelSpreadSheet {
 	@Test
 	public void testIsRowLessThan() {
 		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
-		assertTrue(spreadSheet.isRowLessThan(5, "A10"));
-		assertFalse(spreadSheet.isRowLessThan(150, "AB120"));
+		assertTrue(spreadSheet.isRowAfter(5, "A10"));
+		assertFalse(spreadSheet.isRowAfter(150, "AB120"));
 	}
 
 	@Test
@@ -229,7 +226,9 @@ public class TestExcelSpreadSheet {
 																	  spreadSheet.put("C8", "Mar8");
 
 		spreadSheet.removeCell("C2", Shift.UP);
-		System.out.println(spreadSheet.getSheet());
+		assertEquals("Mar3", spreadSheet.getEntry("C2"));
+		assertEquals("Mar4", spreadSheet.getEntry("C3"));
+		assertEquals("Mar6", spreadSheet.getEntry("C5"));
 	}
 
 	@Test
@@ -242,10 +241,22 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A5", "Jan5");
 																	  spreadSheet.put("C6", "Mar6");
 		spreadSheet.put("A7", "Jan7");
+
+		spreadSheet.removeCell("B2", Shift.LEFT);
+		assertEquals("Mar2", spreadSheet.getEntry("B2"));
+		assertEquals("Feb3", spreadSheet.getEntry("B3"));
+	}
+
+	@Test
+	public void testCompareCells() {
+		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
+		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
 		
-//		spreadSheet.removeCell("C1", Move.LEFT);
-//		System.out.println(spreadSheet.getSheet());
-		System.out.println("1".compareTo("2"));
+		assertTrue(spreadSheet.compareKeys("1", "B2", "[a-zA-Z]"));
+		assertTrue(spreadSheet.compareKeys("A", "B2", "[0-9]"));
+		assertFalse(spreadSheet.compareKeys("3", "B2", "[a-zA-Z]"));
+		assertFalse(spreadSheet.compareKeys("C", "B2", "[a-zA-Z]"));
 	}
 
 	@Test
