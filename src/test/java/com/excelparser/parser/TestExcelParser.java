@@ -1,12 +1,10 @@
 package com.excelparser.parser;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,9 +12,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.excelparser.matrixmap.Matrix;
+import com.excelparser.persister.SheetDaoImpl;
 
 public class TestExcelParser {
 
+	private final static Logger logger = Logger.getLogger(TestExcelParser.class);
 	private static final File SMALL_EXCEL_FILE = new File("src/test/resources/small-excel.xlsx");
 	private static final File LARGE_EXCEL_FILE = new File("src/test/resources/excel.xlsx");
 	private static final File ASYM_EXCEL_FILE = new File("src/test/resources/asym-spreadsheet.xlsx");
@@ -25,25 +25,25 @@ public class TestExcelParser {
 
 	@BeforeClass
 	public static void preTests() {
-		System.out.println("Used Memory Before All Tests: " + 
+		logger.info("Used Memory Before All Tests: " + 
 					((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@Before
 	public void preTest() {
-		System.out.println("Used Memory Before Test: " + 
+		logger.info("Used Memory Before Test: " + 
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@After
 	public void postTest() {
-		System.out.println("Used Memory After Test: " + 
+		logger.info("Used Memory After Test: " + 
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@AfterClass
 	public static void postTests() {
-		System.out.println("Used Memory After All Tests: " + 
+		logger.info("Used Memory After All Tests: " + 
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
 	}
 
@@ -52,21 +52,9 @@ public class TestExcelParser {
 		ExcelParser excelParser = new ExcelParser();
 		long testStart = System.currentTimeMillis();
 		Matrix<String, String> spreadSheet = excelParser.processOneSheet(SMALL_EXCEL_FILE);
-		assertEquals("B5", spreadSheet.getEntry("B5"));
-		assertEquals(Arrays.asList("B3", "B4"), spreadSheet.getColumn("B", 2, 2));
-		assertEquals(5, spreadSheet.getTotalColumnCells("B"));
-		assertEquals("C3", spreadSheet.getRow(3).get(2));
-		assertEquals(Arrays.asList("A3", "B3", "C3", "D3", "E3", "AA3"), spreadSheet.getRow(3));
-		assertEquals(26, spreadSheet.getTotalCells());
-		assertEquals(Arrays.asList("A2"), spreadSheet.getCells((String s) -> s.equals("A2")));
-		List<String> colB = spreadSheet.getColumn("C", 0, 10);
-		System.out.println(spreadSheet.getEntry("C2"));
-		spreadSheet.removeColumn("B");
-		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
-		assertEquals(colB, newColB);
-		System.out.println(colB);
-		System.out.println(spreadSheet.getEntry("B2"));
-		System.out.println("Total time for small excel test (5 rows x 5 columns): " 
+		assertEquals(5, spreadSheet.getRowCount());
+		assertEquals(25, spreadSheet.getTotalCells());
+		logger.info("Total time for small excel test (5 rows x 5 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
 
@@ -74,52 +62,45 @@ public class TestExcelParser {
 	public void testProcessOneSheetLargeExcelFile() throws Exception {
 		long testStart = System.currentTimeMillis();
 		ExcelParser excelParser = new ExcelParser();
-		long start = System.currentTimeMillis();
 		Matrix<String, String> spreadSheet = excelParser.processOneSheet(LARGE_EXCEL_FILE);
-		System.out.println("Total time parsing large spreadsheet: " 
-							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
-
-		start = System.currentTimeMillis();
-		assertEquals("B5043", spreadSheet.getEntry("B5043"));
-		assertEquals(Arrays.asList("D11", "D12"), spreadSheet.getColumn("D", 10, 2));
-		assertEquals(100000, spreadSheet.getTotalColumnCells("B"));
-		assertEquals("F2334", spreadSheet.getRow(2334).get(5));
+		assertEquals(100000, spreadSheet.getRowCount());
 		assertEquals(1000000, spreadSheet.getTotalCells());
-		List<String> colB = spreadSheet.getColumn("C", 0, 10);
-		System.out.println(spreadSheet.getEntry("C2"));
-		System.out.println(colB);
-		spreadSheet.removeColumn("B");
-		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
-		assertEquals(colB, newColB);
-		System.out.println(spreadSheet.getEntry("B2"));
-		System.out.println("Total time retrieving all request data: "
-							+ (System.currentTimeMillis() - start) / 1000.0 + " seconds");
-		System.out.println("Total time for large excel test (100,000 rows x 10 columns): " 
+		logger.info("Total time for large excel test (100,000 rows x 10 columns): " 
 							+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds");
 	}
 
 	@Test
 	public void testAsymSpreadsheet() throws Exception {
-
 		ExcelParser excelParser = new ExcelParser();
 		long testStart = System.currentTimeMillis();
 		Matrix<String, String> spreadSheet = excelParser.processOneSheet(ASYM_EXCEL_FILE);
-		assertEquals("B5", spreadSheet.getEntry("B5"));
-		assertEquals(Arrays.asList("C3", "C5"), spreadSheet.getColumn("C", 2, 2));
-		assertEquals(12, spreadSheet.getTotalColumnCells("C"));
-		assertTrue(spreadSheet.clearEntry("C6"));
-		assertEquals(5, spreadSheet.getTotalRowCells(6));
-		assertEquals("C3", spreadSheet.getRow(3).get(2));
+		assertEquals(20, spreadSheet.getRowCount());
 		assertEquals(72, spreadSheet.getTotalCells());
-		List<String> colB = spreadSheet.getColumn("C", 0, 10);
-		System.out.println(spreadSheet.getEntry("C2"));
-		System.out.println(colB);
-		spreadSheet.removeColumn("B");
-		List<String> newColB = spreadSheet.getColumn("B", 0, 10);
-		assertEquals(colB, newColB);
-		System.out.println(spreadSheet.getEntry("B2"));
-		System.out.println("Total time for asym spreadsheet test: " 
+		logger.info("Total time for asym spreadsheet test (20 rows x 7 columns): " 
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
+	}
+
+	@Test
+	public void testProcessOneSheetSmallExcelFilePersistsDataSingleThread() throws Exception {
+		ExcelParser excelParser = new ExcelParser();
+		int rowsUploaded = excelParser.persistSheetData(SMALL_EXCEL_FILE, new StubSheetDao(), 5);
+		assertEquals(4, rowsUploaded);
+	}
+
+	@Test
+	public void testProcessOneSheetSmallExcelFilePersistsDataMultiThreaded() throws Exception {
+		ExcelParser excelParser = new ExcelParser();
+		int rowsUploaded = excelParser.persistSheetData(SMALL_EXCEL_FILE, new StubSheetDao(), 5);
+		assertEquals(4, rowsUploaded);
+	}
+
+	private class StubSheetDao extends SheetDaoImpl<String, String> {
+
+		@Override
+		public int create(final Matrix<String, String> spreadSheet) {
+			return spreadSheet.getRowCount();
+		}
+		
 	}
 
 }

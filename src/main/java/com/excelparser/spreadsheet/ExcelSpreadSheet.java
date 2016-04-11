@@ -13,6 +13,7 @@ import com.excelparser.matrixmap.Matrix;
 public class ExcelSpreadSheet implements Matrix<String, String> {
 
 	private Map<String, String> excelMap;
+	private int rowCount;
 
 	public ExcelSpreadSheet() {
 		excelMap = new LinkedHashMap<String, String>();
@@ -369,6 +370,17 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	@Override
 	public void clear() {
 		excelMap.clear();
+		rowCount = 0;
+	}
+
+	@Override
+	public void incrementRowCount() {
+		rowCount++;
+	}
+
+	@Override
+	public int getRowCount() {
+		return rowCount;
 	}
 
 	@Override

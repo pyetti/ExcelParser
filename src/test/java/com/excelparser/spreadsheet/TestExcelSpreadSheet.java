@@ -87,7 +87,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testClearEntry() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1");
 		assertTrue(spreadSheet.clearEntry("B1"));
 		assertEquals("", spreadSheet.getEntry("B1"));
@@ -96,7 +96,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testPut() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1");
 		spreadSheet.put("C2", "Mar2");
 	}
@@ -108,7 +108,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testIsEmpty() {
-		ExcelSpreadSheet spreadSheet2 = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet2 = new ExcelSpreadSheet();
 		assertTrue(spreadSheet2.isEmpty());
 		assertFalse(spreadSheet.isEmpty());
 	}
@@ -136,7 +136,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testRemoveColumn() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1"); spreadSheet.put("D1", "Mar1");
 		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2"); spreadSheet.put("D2", "Mar1");
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3"); spreadSheet.put("D3", "Mar1");
@@ -165,7 +165,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testRemoveRow() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
 		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
@@ -215,7 +215,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testRemoveCellMoveUp() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
 		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
@@ -233,7 +233,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testRemoveCellMoveLeft() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
 		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
@@ -261,7 +261,7 @@ public class TestExcelSpreadSheet {
 
 	@Test
 	public void testClear() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		Matrix<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
 		spreadSheet.clear();
 		assertTrue(spreadSheet.isEmpty());
