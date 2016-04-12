@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -163,6 +162,7 @@ public class ExcelParser {
 		private int numColumnsExpected;
 		private int numColumnsRead;
 		private int rowsPersisted;
+		private XSSFRichTextStringParser xssfRichTextString;
 
 		public SheetHandler(SharedStringsTable sst, Matrix<String, String> spreadSheet, 
 				SheetPersister<String, String> sheetPersister, int numColumnsExpected) {
@@ -210,8 +210,7 @@ public class ExcelParser {
 			// Do now, as characters() may be called more than once
 			if (nextIsString) {
 				int idx = Integer.parseInt(cellValue);
-				cellValue = new XSSFRichTextString(sst.getEntryAt(idx))
-						.toString();
+				cellValue = xssfRichTextString.getString(sst.getEntryAt(idx));
 				nextIsString = false;
 			}
 
