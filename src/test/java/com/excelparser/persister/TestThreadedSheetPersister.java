@@ -1,19 +1,19 @@
 package com.excelparser.persister;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import com.excelparser.matrixmap.Matrix;
 import com.excelparser.spreadsheet.ExcelSpreadSheet;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public class TestThreadedSheetPersister {
 
 	@Test
 	public void testPersist() {
-		ExcelSpreadSheet spreadSheet = new ExcelSpreadSheet();
+		SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
 		spreadSheet.put("A1", "Jan1"); spreadSheet.put("B1", "Feb1"); spreadSheet.put("C1", "Mar1");
 		spreadSheet.put("A2", "Jan2"); spreadSheet.put("B2", "Feb2"); spreadSheet.put("C2", "Mar2");
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
@@ -42,7 +42,7 @@ public class TestThreadedSheetPersister {
 		@Override
 		public SheetPersistenceRunner<String, String> getSheetPersistenceRunner(
 				final Database<String, String> database,
-				final Matrix<String, String> spreadSheet) {
+				final SpreadSheet<String, String> spreadSheet) {
 			return new StubSheetPersistenceRunner(database, spreadSheet);
 		}
 
@@ -51,10 +51,10 @@ public class TestThreadedSheetPersister {
 	private class StubSheetPersistenceRunner extends
 			SheetPersistenceRunner<String, String> {
 
-		private Matrix<String, String> spreadSheet;
+		private SpreadSheet<String, String> spreadSheet;
 
 		public StubSheetPersistenceRunner(Database<String, String> database,
-				Matrix<String, String> spreadSheet) {
+				SpreadSheet<String, String> spreadSheet) {
 			super(database, spreadSheet);
 			this.spreadSheet = spreadSheet;
 		}

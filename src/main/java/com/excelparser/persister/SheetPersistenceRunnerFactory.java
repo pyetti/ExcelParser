@@ -1,11 +1,11 @@
 package com.excelparser.persister;
 
-import com.excelparser.matrixmap.Matrix;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public class SheetPersistenceRunnerFactory<K, V> {
 
 	public SheetPersistenceRunner<K, V> getSheetPersistenceRunner(final Database<K, V> database, 
-			final Matrix<K, V> spreadSheet) {
+			final SpreadSheet<K, V> spreadSheet) {
 		return new SheetPersistenceRunner<K, V>(database, spreadSheet);
 	}
 

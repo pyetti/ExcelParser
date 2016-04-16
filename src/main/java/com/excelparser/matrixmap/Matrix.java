@@ -133,8 +133,4 @@ public interface Matrix<K, V> {
 
 	Map<K, V> getSheet();
 
-	public abstract int getRowCount();
-
-	public abstract void incrementRowCount();
-
 }

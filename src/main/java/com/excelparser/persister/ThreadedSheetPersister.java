@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import com.excelparser.matrixmap.Matrix;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 
@@ -31,7 +31,7 @@ public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 	}
 
 	@Override
-	public void persist(final Matrix<K, V> spreadSheet) {
+	public void persist(final SpreadSheet<K, V> spreadSheet) {
 		results.add(executor.submit(runnerFactory.getSheetPersistenceRunner(database, spreadSheet)));
 	}
 

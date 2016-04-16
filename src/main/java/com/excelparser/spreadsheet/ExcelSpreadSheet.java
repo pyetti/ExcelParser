@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import com.excelparser.matrixmap.Matrix;
-
-public class ExcelSpreadSheet implements Matrix<String, String> {
+public class ExcelSpreadSheet implements SpreadSheet<String, String> {
 
 	private Map<String, String> excelMap;
+	private int startRowNum;
+	private int endRowNum;
 	private int rowCount;
 
 	public ExcelSpreadSheet() {
@@ -371,6 +371,28 @@ public class ExcelSpreadSheet implements Matrix<String, String> {
 	public void clear() {
 		excelMap.clear();
 		rowCount = 0;
+		startRowNum = 0;
+		endRowNum = 0;
+	}
+
+	@Override
+	public int getStartRowNum() {
+		return startRowNum;
+	}
+
+	@Override
+	public void setStartRowNum(int startRowNum) {
+		this.startRowNum = startRowNum;
+	}
+
+	@Override
+	public int getEndRowNum() {
+		return endRowNum;
+	}
+
+	@Override
+	public void setEndRowNum(int endRowNum) {
+		this.endRowNum = endRowNum;
 	}
 
 	@Override

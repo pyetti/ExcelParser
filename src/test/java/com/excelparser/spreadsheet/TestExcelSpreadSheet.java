@@ -23,7 +23,7 @@ public class TestExcelSpreadSheet {
 		spreadSheet.put("A3", "Jan3"); spreadSheet.put("B3", "Feb3"); spreadSheet.put("C3", "Mar3");
 		spreadSheet.put("A4", "Jan4"); 								  spreadSheet.put("C4", "Mar4");
 		spreadSheet.put("A5", "Jan5");
-																	  spreadSheet.put("C6", "Jan6");
+																	  spreadSheet.put("C6", "Mar6");
 		spreadSheet.put("A7", "Jan7");
 	}
 

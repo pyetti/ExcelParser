@@ -1,6 +1,6 @@
 package com.excelparser.persister;
 
-import com.excelparser.matrixmap.Matrix;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public class SimpleSheetPersister<K, V> implements SheetPersister<K, V> {
 
@@ -12,8 +12,8 @@ public class SimpleSheetPersister<K, V> implements SheetPersister<K, V> {
 	}
 
 	@Override
-	public void persist(final Matrix<K, V> spreadSheet) {
-		rowsPersisted = database.getSheetDao().create(spreadSheet);
+	public void persist(final SpreadSheet<K, V> spreadSheet) {
+		rowsPersisted += database.getSheetDao().create(spreadSheet);
 	}
 
 	@Override

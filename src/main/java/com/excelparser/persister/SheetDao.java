@@ -1,9 +1,9 @@
 package com.excelparser.persister;
 
-import com.excelparser.matrixmap.Matrix;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public interface SheetDao<K, V> {
 
-	int create(Matrix<K, V> spreadSheet);
+	int create(SpreadSheet<K, V> spreadSheet);
 
 }

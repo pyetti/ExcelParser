@@ -1,10 +1,10 @@
 package com.excelparser.persister;
 
-import com.excelparser.matrixmap.Matrix;
+import com.excelparser.spreadsheet.SpreadSheet;
 
 public interface SheetPersister<K, V> {
 
-	void persist(Matrix<K, V> spreadSheet);
+	void persist(SpreadSheet<K, V> spreadSheet);
 	int getRowsPersisted();
 
 }
