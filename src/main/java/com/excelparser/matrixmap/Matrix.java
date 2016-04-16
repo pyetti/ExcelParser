@@ -131,7 +131,7 @@ public interface Matrix<K, V> {
 	 */
 	void removeCell(K key, Shift move);
 
-	Map<String, String> getSheet();
+	Map<K, V> getSheet();
 
 	public abstract int getRowCount();
 
