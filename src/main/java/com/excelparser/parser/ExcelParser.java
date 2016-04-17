@@ -30,8 +30,13 @@ import com.excelparser.spreadsheet.SpreadSheet;
 public class ExcelParser {
 
 	private final static Logger logger = Logger.getLogger(ExcelParser.class);
+	private static final int mb = 1024*1024;
+	private static final Runtime runtime = Runtime.getRuntime();
 
 	public SpreadSheet<String, String> processOneSheet(File file) throws Exception {
+		logger.info("Starting processOneSheet");
+		logger.info("Used Memory Before processOneSheet: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -46,11 +51,17 @@ public class ExcelParser {
 		InputSource sheetSource = new InputSource(sheet);
 		parser.parse(sheetSource);
 		sheet.close();
+		logger.info("Finished processOneSheet");
+		logger.info("Used Memory After processOneSheet: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return spreadSheet;
 	}
 
 	// TODO test this
 	public List<SpreadSheet<String, String>> processAllSheets(File file) throws Exception {
+		logger.info("Starting processAllSheets");
+		logger.info("Used Memory Before processAllSheets: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -67,11 +78,17 @@ public class ExcelParser {
 			sheet.close();
 			sheetList.add(spreadSheet);
 		}
+		logger.info("Finished processAllSheets");
+		logger.info("Used Memory After processAllSheets: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetList;
 	}
 
 	public int persistSheetData(File file, SheetDao<String, String> sheetDao, 
 			int numColumnsExpected) throws Exception {
+		logger.info("Starting persistSheetData");
+		logger.info("Used Memory Before persistSheetData: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -88,12 +105,17 @@ public class ExcelParser {
 		if (!handler.getSpreadSheet().isEmpty()) {
 			sheetPersister.persist(handler.getSpreadSheet());
 		}
+		logger.info("Finished persistSheetData");
+		logger.info("Used Memory After persistSheetData: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetPersister.getRowsPersisted();
 	}
 
 	public int persistSheetDataThreaded(File file, DataSource dataSource, String insertQuery, 
 			int numColumnsExpected) throws Exception {
 		logger.info("Starting persistSheetDataThreaded");
+		logger.info("Used Memory Before Persist: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -113,11 +135,16 @@ public class ExcelParser {
 		int rowsPersisted = sheetPersister.getRowsPersisted();
 		sheetPersister.shutdownExecutorService();
 		logger.info("Finished persistSheetDataThreaded");
+		logger.info("Used Memory After Persist: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return rowsPersisted;
 	}
 
 	public int persistSheetData(File file, SheetPersister<String, String> sheetPersister, 
 			int numColumnsExpected) throws Exception {
+		logger.info("Starting persistSheetData");
+		logger.info("Used Memory Before persistSheetData: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -135,6 +162,9 @@ public class ExcelParser {
 		if (sheetPersister instanceof ThreadedSheetPersister) {
 			((ThreadedSheetPersister<String, String>) sheetPersister).shutdownExecutorService();
 		}
+		logger.info("Starting persistSheetData");
+		logger.info("Used Memory Before persistSheetData: " + 
+				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetPersister.getRowsPersisted();
 	}
 
