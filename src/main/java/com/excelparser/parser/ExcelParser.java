@@ -2,7 +2,6 @@ package com.excelparser.parser;
 
 import java.io.File;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,10 +10,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -23,6 +20,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.excelparser.persister.Database;
 import com.excelparser.persister.SheetDao;
+import com.excelparser.persister.SheetPersistenceHandler;
 import com.excelparser.persister.SheetPersister;
 import com.excelparser.persister.SimpleSheetPersister;
 import com.excelparser.persister.ThreadedSheetPersister;
@@ -39,7 +37,7 @@ public class ExcelParser {
 		SharedStringsTable sst = r.getSharedStringsTable();
 
 		SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
-		XMLReader parser = fetchSheetParser(new SheetHandler(sst, spreadSheet));
+		XMLReader parser = fetchSheetParser(new SheetHandler(sst));
 
 		// To look up the Sheet Name / Sheet Order / rID,
 		// you need to process the core Workbook stream.
@@ -78,42 +76,40 @@ public class ExcelParser {
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
 
-		SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
 		Database<String, String> database = new Database<String, String>(sheetDao);
 		SheetPersister<String, String> sheetPersister = new SimpleSheetPersister<String, String>(database);
-		SheetHandler handler = new SheetHandler(sst, spreadSheet, sheetPersister, numColumnsExpected);
+		SheetHandler handler = new SheetPersistenceHandler(sst, sheetPersister, numColumnsExpected);
 		XMLReader parser = fetchSheetParser(handler);
 
 		InputStream sheet = r.getSheet("rId1");
 		InputSource sheetSource = new InputSource(sheet);
 		parser.parse(sheetSource);
 		sheet.close();
-		if (!spreadSheet.isEmpty()) {
-			sheetDao.create(spreadSheet);
+		if (!handler.getSpreadSheet().isEmpty()) {
+			sheetPersister.persist(handler.getSpreadSheet());
 		}
-		return handler.getRowsPersisted();
+		return sheetPersister.getRowsPersisted();
 	}
 
-	public int persistSheetDataThreaded(File file, DataSource dataSource, String sql, 
+	public int persistSheetDataThreaded(File file, DataSource dataSource, String insertQuery, 
 			int numColumnsExpected) throws Exception {
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
 
-		SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
-		Database<String, String> database = new Database<String, String>(dataSource, sql);
+		Database<String, String> database = new Database<String, String>(dataSource, insertQuery);
 		ThreadedSheetPersister<String, String> sheetPersister = new ThreadedSheetPersister<String, String>(database);
-		SheetHandler handler = new SheetHandler(sst, spreadSheet, sheetPersister, numColumnsExpected);
+		SheetHandler handler = new SheetPersistenceHandler(sst, sheetPersister, numColumnsExpected);
 		XMLReader parser = fetchSheetParser(handler);
 
 		InputStream sheet = r.getSheet("rId1");
 		InputSource sheetSource = new InputSource(sheet);
 		parser.parse(sheetSource);
 		sheet.close();
-		if (!spreadSheet.isEmpty()) {
-			sheetPersister.persist(spreadSheet);
+		if (!handler.getSpreadSheet().isEmpty()) {
+			sheetPersister.persist(handler.getSpreadSheet());
 		}
-		int rowsPersisted = handler.getRowsPersisted();
+		int rowsPersisted = sheetPersister.getRowsPersisted();
 		sheetPersister.shutdownExecutorService();
 		return rowsPersisted;
 	}
@@ -124,21 +120,20 @@ public class ExcelParser {
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
 
-		SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
-		SheetHandler handler = new SheetHandler(sst, spreadSheet, sheetPersister, numColumnsExpected);
+		SheetHandler handler = new SheetPersistenceHandler(sst, sheetPersister, numColumnsExpected);
 		XMLReader parser = fetchSheetParser(handler);
 
 		InputStream sheet = r.getSheet("rId1");
 		InputSource sheetSource = new InputSource(sheet);
 		parser.parse(sheetSource);
 		sheet.close();
-		if (!spreadSheet.isEmpty()) {
-			sheetPersister.persist(spreadSheet);
+		if (!handler.getSpreadSheet().isEmpty()) {
+			sheetPersister.persist(handler.getSpreadSheet());
 		}
 		if (sheetPersister instanceof ThreadedSheetPersister) {
 			((ThreadedSheetPersister<String, String>) sheetPersister).shutdownExecutorService();
 		}
-		return handler.getRowsPersisted();
+		return sheetPersister.getRowsPersisted();
 	}
 
 	private XMLReader fetchSheetParser(DefaultHandler sheetHandler) throws SAXException {
@@ -146,130 +141,6 @@ public class ExcelParser {
 				.createXMLReader("org.apache.xerces.parsers.SAXParser");
 		parser.setContentHandler(sheetHandler);
 		return parser;
-	}
-
-	/**
-	 * See org.xml.sax.helpers.DefaultHandler javadocs
-	 */
-	private class SheetHandler extends DefaultHandler {
-
-		private SharedStringsTable sst;
-		private String cellValue;
-		private boolean nextIsString;
-		private String cell;
-		private int row;
-		private final SpreadSheet<String, String> spreadSheet;
-		private SheetPersister<String, String> sheetPersister;
-		private boolean persist;
-		private int maxRowsPerRead = 2;
-		private int numColumnsExpected;
-		private int numColumnsRead;
-		private XSSFRichTextStringParser xssfRichTextString;
-		private boolean isDate;
-		private boolean newSheet = true;
-
-		public SheetHandler(SharedStringsTable sst, SpreadSheet<String, String> spreadSheet, 
-				SheetPersister<String, String> sheetPersister, int numColumnsExpected) {
-			this.sst = sst;
-			this.spreadSheet = spreadSheet;
-			this.sheetPersister = sheetPersister;
-			this.numColumnsExpected = numColumnsExpected;
-			this.persist = true;
-			xssfRichTextString = new XSSFRichTextStringParser();
-		}
-
-		public SheetHandler(SharedStringsTable sst, SpreadSheet<String, String> spreadSheet) {
-			this.sst = sst;
-			this.spreadSheet = spreadSheet;
-			this.persist = false;
-			xssfRichTextString = new XSSFRichTextStringParser();
-		}
-
-		public void startElement(String uri, String localName, String name,
-				Attributes attributes) throws SAXException {
-			// c => cell
-			if (name.equals("c")) {
-				// Print the cell reference
-				isDate = attributes.getValue("s") != null ? true : false;
-				cell = attributes.getValue("r");
-				// System.out.print(attributes.getValue("r") + " - ");
-				// Figure out if the value is an index in the SST
-				String cellType = attributes.getValue("t");
-				if (cellType != null && cellType.equals("s")) {
-					nextIsString = true;
-				} else {
-					nextIsString = false;
-				}
-			} else if (name.equals("row")) {
-				row++;
-				if (persist) numColumnsRead = 0;
-				if (newSheet) {
-					updateSheetStartRowNum();
-				} else {
-					spreadSheet.setEndRowNum(row);
-					spreadSheet.incrementRowCount();
-				}
-			}
-			// Clear contents cache
-			cellValue = "";
-		}
-
-		private void updateSheetStartRowNum() {
-			spreadSheet.setStartRowNum(row);
-			spreadSheet.setEndRowNum(row);
-			spreadSheet.incrementRowCount();
-			newSheet = false;
-		}
-
-		public void endElement(String uri, String localName, String name)
-				throws SAXException {
-			// Process the last contents as required.
-			// Do now, as characters() may be called more than once
-			if (nextIsString) {
-				int idx = Integer.parseInt(cellValue);
-				cellValue = xssfRichTextString.getString(sst.getEntryAt(idx));
-				nextIsString = false;
-			}
-
-			// v => contents of a cell
-			// Output after we've seen the string contents
-			if (name.equals("v")) {
-				cellValue = isDate ? getFormattedDateString() : cellValue;
-				if (persist) {
-					doPersist();
-				} else {
-					spreadSheet.put(cell, cellValue);
-				}
-			}
-		}
-
-		private String getFormattedDateString() {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			return sdf.format(DateUtil.getJavaDate(Double.parseDouble(cellValue)));
-		}
-
-		private void doPersist() {
-			if (row > 1) {
-				spreadSheet.put(cell, cellValue);
-				numColumnsRead++;
-				if (row % maxRowsPerRead == 0 && numColumnsRead % numColumnsExpected == 0) {
-					sheetPersister.persist(spreadSheet);
-					spreadSheet.clear();
-					newSheet = true;
-					numColumnsRead = 0;
-				}
-			}
-		}
-
-		public void characters(char[] ch, int start, int length)
-				throws SAXException {
-			cellValue += new String(ch, start, length);
-		}
-
-		public int getRowsPersisted() {
-			return sheetPersister.getRowsPersisted();
-		}
-
 	}
 
 }
