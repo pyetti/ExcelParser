@@ -13,7 +13,7 @@ public class SheetPersistenceHandler extends SheetHandler {
 	private int numColumnsRead;
 	private int row;
 	private boolean newSheet;
-	private int maxRowsPerRead = 2000;
+	public static final int MAX_ROWS_PER_READ = 1000;
 	private SpreadSheet<String, String> spreadSheet;
 
 	public SheetPersistenceHandler(SharedStringsTable sst,
@@ -57,7 +57,7 @@ public class SheetPersistenceHandler extends SheetHandler {
 		if (row > 1) {
 			spreadSheet.put(getCell(), getCellValue());
 			numColumnsRead++;
-			if (numColumnsRead % numColumnsExpected == 0 && row % maxRowsPerRead == 0) {
+			if (numColumnsRead % numColumnsExpected == 0 && row % MAX_ROWS_PER_READ == 0) {
 				sheetPersister.persist(spreadSheet);
 				spreadSheet = new ExcelSpreadSheet();
 				newSheet = true;
