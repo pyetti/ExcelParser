@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.apache.log4j.Logger;
+
 public class ExcelSpreadSheet implements SpreadSheet<String, String> {
 
+	private final static Logger logger = Logger.getLogger(ExcelSpreadSheet.class.getName());
 	private Map<String, String> excelMap;
 	private int startRowNum;
 	private int endRowNum;
@@ -373,6 +376,7 @@ public class ExcelSpreadSheet implements SpreadSheet<String, String> {
 		rowCount = 0;
 		startRowNum = 0;
 		endRowNum = 0;
+		logger.info("Sheet cleared");
 	}
 
 	@Override
