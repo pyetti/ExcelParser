@@ -16,7 +16,7 @@ public class SheetPersistenceRunner<K, V> implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws Exception {
-		return new SheetDaoImpl<K, V>(database.getDataSource(), database.getSql()).create(spreadSheet);
+		return new SheetDaoImpl<K, V>(database).create(spreadSheet);
 	}
 
 }
