@@ -93,6 +93,7 @@ public class ExcelParser {
 
 	public int persistSheetDataThreaded(File file, DataSource dataSource, String insertQuery, 
 			int numColumnsExpected) throws Exception {
+		logger.info("Starting persistSheetDataThreaded");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
 		SharedStringsTable sst = r.getSharedStringsTable();
@@ -111,6 +112,7 @@ public class ExcelParser {
 		}
 		int rowsPersisted = sheetPersister.getRowsPersisted();
 		sheetPersister.shutdownExecutorService();
+		logger.info("Finished persistSheetDataThreaded");
 		return rowsPersisted;
 	}
 
