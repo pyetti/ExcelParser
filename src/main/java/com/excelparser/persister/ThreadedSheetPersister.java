@@ -8,13 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import com.excelparser.spreadsheet.SpreadSheet;
 
+@Slf4j
 public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 
-	private final static Logger logger = Logger.getLogger(ThreadedSheetPersister.class.getName());
 	private final Database<K, V> database;
 	private List<Future<Integer>> results;
 	private SheetPersistenceRunnerFactory<K, V> runnerFactory;
@@ -39,7 +39,7 @@ public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 	}
 
 	public void shutdownExecutorService() {
-		logger.info("Shutting down ExecutorService");
+		log.info("Shutting down ExecutorService");
 		executor.shutdown(); // Disable new tasks from being submitted
 	   try {
 	     // Wait a while for existing tasks to terminate
@@ -47,12 +47,12 @@ public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 	       executor.shutdownNow(); // Cancel currently executing tasks
 	       // Wait a while for tasks to respond to being cancelled
 	       if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-	           logger.error("ExecutorService did not terminate");
+	           log.error("ExecutorService did not terminate");
 	       } else {
-	    	   logger.info("ExecutorService is shutdown");
+	    	   log.info("ExecutorService is shutdown");
 	       }
 	     } else {
-	    	 logger.info("ExecutorService is shutdown");
+	    	 log.info("ExecutorService is shutdown");
 	     }
 	   } catch (InterruptedException ie) {
 	     // (Re-)Cancel if current thread also interrupted
@@ -72,7 +72,7 @@ public class ThreadedSheetPersister<K, V> implements SheetPersister<K, V> {
 			}
 			return rowsPersisted;
 		} catch (ExecutionException | InterruptedException e) {
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 		return rowsPersisted;
 	}

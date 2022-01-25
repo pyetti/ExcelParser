@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import com.excelparser.spreadsheet.Shift;
+import lombok.extern.slf4j.Slf4j;
 
 public interface Matrix<K, V> {
 

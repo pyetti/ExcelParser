@@ -1,24 +1,20 @@
 package com.excelparser.parser;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import lombok.extern.slf4j.Slf4j;
 
 import com.excelparser.persister.SheetDaoImpl;
 import com.excelparser.spreadsheet.SpreadSheet;
+import org.junit.*;
 
+import static org.junit.Assert.assertEquals;
+
+@Slf4j
 public class TestExcelParser {
 
-	private final static Logger logger = Logger.getLogger(TestExcelParser.class);
 	private static final File SMALL_EXCEL_FILE = new File("src/test/resources/small-excel.xlsx");
 	private static final File LARGE_EXCEL_FILE = new File("src/test/resources/excel.xlsx");
 	private static final File ASYM_EXCEL_FILE = new File("src/test/resources/asym-spreadsheet.xlsx");
@@ -27,25 +23,25 @@ public class TestExcelParser {
 
 	@BeforeClass
 	public static void preTests() {
-		logger.info("Used Memory Before All Tests: " + 
+		log.info("Used Memory Before All Tests: " +
 					((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@Before
 	public void preTest() {
-		logger.info("Used Memory Before Test: " + 
+		log.info("Used Memory Before Test: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@After
 	public void postTest() {
-		logger.info("Used Memory After Test: " + 
+		log.info("Used Memory After Test: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 	}
 
 	@AfterClass
 	public static void postTests() {
-		logger.info("Used Memory After All Tests: " + 
+		log.info("Used Memory After All Tests: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB");
 	}
 
@@ -56,7 +52,7 @@ public class TestExcelParser {
 		SpreadSheet<String, String> spreadSheet = excelParser.processOneSheet(SMALL_EXCEL_FILE);
 		assertEquals(5, spreadSheet.getRowCount());
 		assertEquals(25, spreadSheet.getTotalCells());
-		logger.info("Total time for small excel test (5 rows x 5 columns): " 
+		log.info("Total time for small excel test (5 rows x 5 columns): "
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
 
@@ -67,7 +63,7 @@ public class TestExcelParser {
 		SpreadSheet<String, String> spreadSheet = excelParser.processOneSheet(LARGE_EXCEL_FILE);
 		assertEquals(100000, spreadSheet.getRowCount());
 		assertEquals(1000000, spreadSheet.getTotalCells());
-		logger.info("Total time for large excel test (100,000 rows x 10 columns): " 
+		log.info("Total time for large excel test (100,000 rows x 10 columns): "
 							+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds");
 	}
 
@@ -78,7 +74,7 @@ public class TestExcelParser {
 		SpreadSheet<String, String> spreadSheet = excelParser.processOneSheet(ASYM_EXCEL_FILE);
 		assertEquals(20, spreadSheet.getRowCount());
 		assertEquals(72, spreadSheet.getTotalCells());
-		logger.info("Total time for asym spreadsheet test (20 rows x 7 columns): " 
+		log.info("Total time for asym spreadsheet test (20 rows x 7 columns): "
 				+ (System.currentTimeMillis() - testStart) / 1000.0 + " seconds\n");
 	}
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
@@ -27,15 +27,15 @@ import com.excelparser.persister.ThreadedSheetPersister;
 import com.excelparser.spreadsheet.ExcelSpreadSheet;
 import com.excelparser.spreadsheet.SpreadSheet;
 
+@Slf4j
 public class ExcelParser {
 
-	private final static Logger logger = Logger.getLogger(ExcelParser.class);
 	private static final int mb = 1024*1024;
 	private static final Runtime runtime = Runtime.getRuntime();
 
 	public SpreadSheet<String, String> processOneSheet(File file) throws Exception {
-		logger.info("Starting processOneSheet");
-		logger.info("Used Memory Before processOneSheet: " + 
+		log.info("Starting processOneSheet");
+		log.info("Used Memory Before processOneSheet: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
@@ -51,16 +51,16 @@ public class ExcelParser {
 		InputSource sheetSource = new InputSource(sheet);
 		parser.parse(sheetSource);
 		sheet.close();
-		logger.info("Finished processOneSheet");
-		logger.info("Used Memory After processOneSheet: " + 
+		log.info("Finished processOneSheet");
+		log.info("Used Memory After processOneSheet: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return spreadSheet;
 	}
 
 	// TODO test this
 	public List<SpreadSheet<String, String>> processAllSheets(File file) throws Exception {
-		logger.info("Starting processAllSheets");
-		logger.info("Used Memory Before processAllSheets: " + 
+		log.info("Starting processAllSheets");
+		log.info("Used Memory Before processAllSheets: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
@@ -71,23 +71,23 @@ public class ExcelParser {
 		while (sheets.hasNext()) {
 			SpreadSheet<String, String> spreadSheet = new ExcelSpreadSheet();
 			XMLReader parser = fetchSheetParser(new SheetHandler(sst, spreadSheet));
-			logger.info("Processing new sheet:\n");
+			log.info("Processing new sheet:\n");
 			InputStream sheet = sheets.next();
 			InputSource sheetSource = new InputSource(sheet);
 			parser.parse(sheetSource);
 			sheet.close();
 			sheetList.add(spreadSheet);
 		}
-		logger.info("Finished processAllSheets");
-		logger.info("Used Memory After processAllSheets: " + 
+		log.info("Finished processAllSheets");
+		log.info("Used Memory After processAllSheets: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetList;
 	}
 
 	public int persistSheetData(File file, SheetDao<String, String> sheetDao, 
 			int numColumnsExpected) throws Exception {
-		logger.info("Starting persistSheetData");
-		logger.info("Used Memory Before persistSheetData: " + 
+		log.info("Starting persistSheetData");
+		log.info("Used Memory Before persistSheetData: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
@@ -105,16 +105,16 @@ public class ExcelParser {
 		if (!handler.getSpreadSheet().isEmpty()) {
 			sheetPersister.persist(handler.getSpreadSheet());
 		}
-		logger.info("Finished persistSheetData");
-		logger.info("Used Memory After persistSheetData: " + 
+		log.info("Finished persistSheetData");
+		log.info("Used Memory After persistSheetData: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetPersister.getRowsPersisted();
 	}
 
 	public int persistSheetDataThreaded(File file, DataSource dataSource, String insertQuery, 
 			int numColumnsExpected) throws Exception {
-		logger.info("Starting persistSheetDataThreaded");
-		logger.info("Used Memory Before Persist: " + 
+		log.info("Starting persistSheetDataThreaded");
+		log.info("Used Memory Before Persist: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
@@ -134,16 +134,16 @@ public class ExcelParser {
 		}
 		int rowsPersisted = sheetPersister.getRowsPersisted();
 		sheetPersister.shutdownExecutorService();
-		logger.info("Finished persistSheetDataThreaded");
-		logger.info("Used Memory After Persist: " + 
+		log.info("Finished persistSheetDataThreaded");
+		log.info("Used Memory After Persist: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return rowsPersisted;
 	}
 
 	public int persistSheetData(File file, SheetPersister<String, String> sheetPersister, 
 			int numColumnsExpected) throws Exception {
-		logger.info("Starting persistSheetData");
-		logger.info("Used Memory Before persistSheetData: " + 
+		log.info("Starting persistSheetData");
+		log.info("Used Memory Before persistSheetData: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		OPCPackage pkg = OPCPackage.open(file);
 		XSSFReader r = new XSSFReader(pkg);
@@ -162,8 +162,8 @@ public class ExcelParser {
 		if (sheetPersister instanceof ThreadedSheetPersister) {
 			((ThreadedSheetPersister<String, String>) sheetPersister).shutdownExecutorService();
 		}
-		logger.info("Starting persistSheetData");
-		logger.info("Used Memory Before persistSheetData: " + 
+		log.info("Starting persistSheetData");
+		log.info("Used Memory Before persistSheetData: " +
 				((runtime.totalMemory() - runtime.freeMemory()) / mb) + "MB\n");
 		return sheetPersister.getRowsPersisted();
 	}

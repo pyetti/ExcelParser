@@ -7,14 +7,14 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import com.excelparser.spreadsheet.SpreadSheet;
 
+@Slf4j
 public class SheetDaoImpl<K, V> implements SheetDao<K, V> {
 
-	private final static Logger logger = Logger.getLogger(SheetDaoImpl.class.getName());
 	private DataSource dataSource;
 	private String insertQuery;
 
@@ -30,7 +30,7 @@ public class SheetDaoImpl<K, V> implements SheetDao<K, V> {
 
 	@Override
 	public int create(final SpreadSheet<K, V> spreadSheet) {
-		logger.info("Persisting " + spreadSheet.getRowCount() + " rows.");
+		log.info("Persisting " + spreadSheet.getRowCount() + " rows.");
 		Connection conn = null;
 		PreparedStatement pst = null;
 		try {
@@ -51,12 +51,12 @@ public class SheetDaoImpl<K, V> implements SheetDao<K, V> {
 				spreadSheet.clear();
 				numRowsUploaded += pst.executeBatch().length;
 				pst.clearBatch();
-				logger.info("Number of rows persisted: " + numRowsUploaded);
+				log.info("Number of rows persisted: " + numRowsUploaded);
 				return numRowsUploaded;
 			}
-			logger.error("Failed to connect to database.");
+			log.error("Failed to connect to database.");
 		} catch (SQLException e) {
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return -1;
 		} finally {
 			close(conn, pst);
@@ -69,14 +69,14 @@ public class SheetDaoImpl<K, V> implements SheetDao<K, V> {
 			try {
 				pst.close();
 			} catch (SQLException e) {
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		if (conn != null) {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				logger.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 	}
